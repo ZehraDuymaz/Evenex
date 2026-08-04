@@ -1,8 +1,20 @@
 {
   "version": 2,
-  "dgSpecHash": "RiHYjEZ3wXA=",
+  "dgSpecHash": "nJvKkOKyRW0=",
   "success": true,
   "projectFilePath": "/home/deniz/cs/Evenex/src/Evenex.Application/Evenex.Application.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/deniz/.nuget/packages/microsoft.entityframeworkcore/10.0.10/microsoft.entityframeworkcore.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.entityframeworkcore.abstractions/10.0.10/microsoft.entityframeworkcore.abstractions.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.entityframeworkcore.analyzers/10.0.10/microsoft.entityframeworkcore.analyzers.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.caching.abstractions/10.0.10/microsoft.extensions.caching.abstractions.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.caching.memory/10.0.10/microsoft.extensions.caching.memory.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.10/microsoft.extensions.dependencyinjection.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.10/microsoft.extensions.dependencyinjection.abstractions.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.logging/10.0.10/microsoft.extensions.logging.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.10/microsoft.extensions.logging.abstractions.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.options/10.0.10/microsoft.extensions.options.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.primitives/10.0.10/microsoft.extensions.primitives.10.0.10.nupkg.sha512"
+  ],
   "logs": []
 }

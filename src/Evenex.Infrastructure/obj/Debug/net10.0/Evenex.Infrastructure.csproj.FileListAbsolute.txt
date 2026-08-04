@@ -18,3 +18,5 @@
 /home/deniz/cs/Evenex/src/Evenex.Infrastructure/obj/Debug/net10.0/refint/Evenex.Infrastructure.dll
 /home/deniz/cs/Evenex/src/Evenex.Infrastructure/obj/Debug/net10.0/Evenex.Infrastructure.pdb
 /home/deniz/cs/Evenex/src/Evenex.Infrastructure/obj/Debug/net10.0/ref/Evenex.Infrastructure.dll
+/home/deniz/cs/Evenex/src/Evenex.Infrastructure/bin/Debug/net10.0/Evenex.Infrastructure.runtimeconfig.json
+/home/deniz/cs/Evenex/src/Evenex.Infrastructure/obj/Debug/net10.0/Evenex.Infrastructure.genruntimeconfig.cache

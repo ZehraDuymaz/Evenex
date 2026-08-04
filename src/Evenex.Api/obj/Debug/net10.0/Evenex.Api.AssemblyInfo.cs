@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("4b5eca98-ae41-4644-8588-e5ad4d51807a")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d4fddf57407fd0d8ac5a8d87c6e52e1eb2dbf78e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a5bc86703fac697089bd9d48cb35dd224af3f4e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
