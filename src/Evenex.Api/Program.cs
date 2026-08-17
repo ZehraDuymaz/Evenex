@@ -26,10 +26,14 @@ builder.Services.AddScoped<AuthService>();
 
 
 //Authentication and Authorization Servisleri
-builder.Services.AddAuthentication(JwtBearerDefaults.Authentication.AddJwtBearer(options =>
+builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -40,7 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.Authentication.AddJwtBearer
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = publicKey,
     };    
-}));
+});
 
 builder.Services.AddAuthorization();
 

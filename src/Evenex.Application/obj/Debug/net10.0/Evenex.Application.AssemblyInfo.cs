@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Evenex.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf4c9329b10321849bbbdb9c2947dd2a183f4140")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19502d103394a6edc3164f26a75a8b3e67464f89")]
 [assembly: System.Reflection.AssemblyProductAttribute("Evenex.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Evenex.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
