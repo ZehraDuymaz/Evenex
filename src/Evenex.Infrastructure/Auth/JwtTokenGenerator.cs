@@ -29,7 +29,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         };
         
 
-        var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.HmacSha256);
+        var creds = new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256);
 
         var token = new JwtSecurityToken(
             // add config !!!

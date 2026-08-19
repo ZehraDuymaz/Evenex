@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2EqONdFgu30=",
+  "dgSpecHash": "3bGJiVpGAiY=",
   "success": true,
   "projectFilePath": "/home/deniz/cs/Evenex/src/Evenex.Api/Evenex.Api.csproj",
   "expectedPackageFiles": [
@@ -27,6 +27,7 @@
     "/home/deniz/.nuget/packages/microsoft.entityframeworkcore.design/10.0.10/microsoft.entityframeworkcore.design.10.0.10.nupkg.sha512",
     "/home/deniz/.nuget/packages/microsoft.entityframeworkcore.relational/10.0.10/microsoft.entityframeworkcore.relational.10.0.10.nupkg.sha512",
     "/home/deniz/.nuget/packages/microsoft.entityframeworkcore.sqlserver/10.0.10/microsoft.entityframeworkcore.sqlserver.10.0.10.nupkg.sha512",
+    "/home/deniz/.nuget/packages/microsoft.extensions.apidescription.server/10.0.0/microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
     "/home/deniz/.nuget/packages/microsoft.extensions.dependencymodel/10.0.10/microsoft.extensions.dependencymodel.10.0.10.nupkg.sha512",
     "/home/deniz/.nuget/packages/microsoft.identity.client/4.73.1/microsoft.identity.client.4.73.1.nupkg.sha512",
     "/home/deniz/.nuget/packages/microsoft.identity.client.extensions.msal/4.73.1/microsoft.identity.client.extensions.msal.4.73.1.nupkg.sha512",
@@ -41,6 +42,11 @@
     "/home/deniz/.nuget/packages/microsoft.visualstudio.solutionpersistence/1.0.52/microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
     "/home/deniz/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
     "/home/deniz/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
+    "/home/deniz/.nuget/packages/scalar.aspnetcore/2.16.20/scalar.aspnetcore.2.16.20.nupkg.sha512",
+    "/home/deniz/.nuget/packages/swashbuckle.aspnetcore/10.2.3/swashbuckle.aspnetcore.10.2.3.nupkg.sha512",
+    "/home/deniz/.nuget/packages/swashbuckle.aspnetcore.swagger/10.2.3/swashbuckle.aspnetcore.swagger.10.2.3.nupkg.sha512",
+    "/home/deniz/.nuget/packages/swashbuckle.aspnetcore.swaggergen/10.2.3/swashbuckle.aspnetcore.swaggergen.10.2.3.nupkg.sha512",
+    "/home/deniz/.nuget/packages/swashbuckle.aspnetcore.swaggerui/10.2.3/swashbuckle.aspnetcore.swaggerui.10.2.3.nupkg.sha512",
     "/home/deniz/.nuget/packages/system.clientmodel/1.5.1/system.clientmodel.1.5.1.nupkg.sha512",
     "/home/deniz/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/home/deniz/.nuget/packages/system.composition/9.0.0/system.composition.9.0.0.nupkg.sha512",

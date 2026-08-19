@@ -41,7 +41,12 @@ public class AuthService
         {
             Email = request.Email,
             PasswordHash = _passwordHasher.Hash(request.Password),
-            Role = UserRole.User
+            Role = UserRole.User,
+            CreatedIP = "127.0.0.1", // get dynamic user ip (this is only for testing)
+            CreatedUser = request.Email,   // They are registering themselves, so they are the creator
+            CreatedDate = DateTime.UtcNow, // The exact moment they registered
+            IsDeleted = false 
+
         };
 
         // user ekle 
