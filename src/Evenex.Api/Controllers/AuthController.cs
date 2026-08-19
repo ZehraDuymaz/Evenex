@@ -36,10 +36,10 @@ public class AuthController : ControllerBase
             return Unauthorized(exErr.Message);
         }
     }
-    // [Authorize]
+    
     [HttpGet("secret")]
     public IActionResult GetSecret()
     {
-        return Ok(new { message = "You have successfully bypassed the security! The JWT works." });
+        return Ok(new { message = "JWT çalışıyor!" });
     }
 }

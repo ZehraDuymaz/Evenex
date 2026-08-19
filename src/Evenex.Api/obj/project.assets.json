@@ -47,6 +47,19 @@
           "lib/net10.0/BCrypt-Net-Next.dll": {}
         }
       },
+      "Hashids.net/1.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/net7.0/Hashids.net.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net7.0/Hashids.net.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -1301,6 +1314,25 @@
         "lib/netstandard2.1/BCrypt-Net-Next.dll",
         "lib/netstandard2.1/BCrypt.Net-Next.xml",
         "readme.md"
+      ]
+    },
+    "Hashids.net/1.7.0": {
+      "sha512": "TuQ8ns5c+eeIOHSgJdwCLb0nWzKqn2gCPSLFoz6nWdhw3tS5Wa43qrwRXT4UJT7XVgHqKssacVU1SGlAOWjeIg==",
+      "type": "package",
+      "path": "hashids.net/1.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "hashids.net.1.7.0.nupkg.sha512",
+        "hashids.net.nuspec",
+        "hashids.png",
+        "lib/net6.0/Hashids.net.dll",
+        "lib/net6.0/Hashids.net.xml",
+        "lib/net7.0/Hashids.net.dll",
+        "lib/net7.0/Hashids.net.xml",
+        "lib/netstandard2.0/Hashids.net.dll",
+        "lib/netstandard2.0/Hashids.net.xml"
       ]
     },
     "Humanizer.Core/2.14.1": {
@@ -3736,6 +3768,7 @@
       "Evenex.Application >= 1.0.0",
       "Evenex.Common >= 1.0.0",
       "Evenex.Infrastructure >= 1.0.0",
+      "Hashids.net >= 1.7.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.10",
       "Microsoft.AspNetCore.OpenApi >= 10.0.9",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.10",
@@ -3797,6 +3830,10 @@
       "net10.0": {
         "targetAlias": "net10.0",
         "dependencies": {
+          "Hashids.net": {
+            "target": "Package",
+            "version": "[1.7.0, )"
+          },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
             "version": "[10.0.10, )"

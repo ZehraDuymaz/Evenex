@@ -7,8 +7,8 @@ using Evenex.Application.Auth;
 using Evenex.Domain.Repositories;
 using Evenex.Infrastructure.Repositories;
 using Evenex.Infrastructure.Auth;
-using Microsoft.AspNetCore.OpenApi;
 using Scalar.AspNetCore;
+using HashidsNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +23,8 @@ var privateKey = new RsaSecurityKey(rsa.ExportParameters(true));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton(publicKey);
 builder.Services.AddSingleton(privateKey);
+builder.Services.AddSingleton<IHashids>(new Hashids("EvenexSuperSecretDeliciousDesserts", 8));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -69,20 +71,19 @@ builder.Services.AddOpenApi(options =>
     {
         document.Components ??= new();
         
-        // Use the native OpenAPI components dictionary and scheme definition
+    
         var securityScheme = new Microsoft.OpenApi.OpenApiSecurityScheme
         {
             Type = Microsoft.OpenApi.SecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            Description = "Enter 'Bearer' [space] and then your token."
+            Description = "Tokeni gir: "
         };
-
-        // Safely add the security scheme component
+        
         document.Components.SecuritySchemes ??= new Dictionary<string, Microsoft.OpenApi.IOpenApiSecurityScheme>();
         document.Components.SecuritySchemes["Bearer"] = securityScheme;
 
-        // Add the global security requirement so Scalar picks it up automatically
+        
         document.Security ??= [];
         document.Security.Add(new Microsoft.OpenApi.OpenApiSecurityRequirement
         {
@@ -99,11 +100,11 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();                  // /openapi/v1.json endpoint'i
+    app.MapOpenApi();               
     app.MapScalarApiReference(options =>
     {
         options.Title  = "Evenex API";
-        options.Theme  = ScalarTheme.DeepSpace;  // istersen Default, Moon, Purple vb.
+        options.Theme  = ScalarTheme.DeepSpace;  
     });
 }
 
