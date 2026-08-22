@@ -1,0 +1,2 @@
+namespace Evenex.Application.Users;
+

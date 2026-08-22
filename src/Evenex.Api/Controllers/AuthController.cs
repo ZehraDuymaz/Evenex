@@ -3,6 +3,7 @@ using Evenex.Application.Auth;
 
 namespace Evenex.Api.Controllers;
 
+//localhost:xxxx/api/...
 [ApiController]
 [Route("api/[controller]")]
 

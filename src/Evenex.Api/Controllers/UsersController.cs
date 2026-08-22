@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Evenex.Api.Controllers;
 
+//localhost:xxxx/api/...
 [ApiController]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
@@ -33,7 +34,7 @@ public class UsersController : ControllerBase
         
         if (decodedArray.Length == 0)
         {
-            return BadRequest("Nice try! Being nasty eh? ");
+            return BadRequest("Nice try! Being nasty eh?");
         }
 
         int realId = decodedArray[0];
