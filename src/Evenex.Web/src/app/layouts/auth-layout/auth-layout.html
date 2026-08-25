@@ -1,0 +1,9 @@
+<div class="auth-wrapper">
+  <div class="auth-header">
+    <app-header [isDarkMode]="isDarkMode()" (toggleTheme)="toggleTheme()"></app-header>
+  </div>
+  
+  <main class="auth-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

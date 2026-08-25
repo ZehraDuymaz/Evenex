@@ -1,0 +1,58 @@
+<div class="create-event-container">
+  <div class="header">
+    <div class="header-left">
+      <h2 class="title">Etkinlik Oluştur</h2>
+      <p class="subtitle">Yeni bir etkinlik oluşturun ve tarih, saat, fiyat gibi detaylarını belirleyin.</p>
+    </div>
+    <div class="header-right">
+      <app-ui-button variant="default" [routerLink]="['/admin/events']">İptal</app-ui-button>
+    </div>
+  </div>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="event-form">
+    <div class="form-section">
+      <h3>Etkinlik Detayları</h3>
+      <div class="form-grid">
+        <app-ui-input 
+          label="Detay (Etkinlik Adı / Açıklama)" 
+          [value]="eventForm.get('details')?.value" 
+          (input)="eventForm.patchValue({details: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Fiyat (TL)" 
+          type="number"
+          [value]="eventForm.get('price')?.value"
+          (input)="eventForm.patchValue({price: $any($event.target).value})"
+        ></app-ui-input>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Tarih ve Zaman</h3>
+      <div class="form-grid">
+        <app-ui-input 
+          label="Etkinlik Tarihi" 
+          type="date"
+          [value]="eventForm.get('date')?.value"
+          (input)="eventForm.patchValue({date: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Etkinlik Saati" 
+          type="time"
+          [value]="eventForm.get('time')?.value"
+          (input)="eventForm.patchValue({time: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Bilet Satış Başlangıç Tarihi" 
+          type="datetime-local"
+          [value]="eventForm.get('ticketSaleStartDate')?.value"
+          (input)="eventForm.patchValue({ticketSaleStartDate: $any($event.target).value})"
+        ></app-ui-input>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <app-ui-button variant="primary" type="submit" [class.disabled]="!eventForm.valid">Etkinliği Kaydet</app-ui-button>
+    </div>
+  </form>
+</div>

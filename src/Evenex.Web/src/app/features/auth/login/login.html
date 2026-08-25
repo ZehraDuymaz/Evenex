@@ -1,0 +1,35 @@
+<div class="auth-card">
+  <div class="auth-card-header">
+    <h1 class="logo-text">Evenex</h1>
+    <p class="subtitle">Tekrar hoş geldiniz! Lütfen bilgilerinizi girin.</p>
+  </div>
+  
+  <form class="auth-form" (submit)="$event.preventDefault()">
+    <app-ui-input label="E-posta" type="email" [hasIcon]="true">
+      <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"></path><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+      </svg>
+    </app-ui-input>
+    
+    <app-ui-input label="Şifre" type="password" [hasIcon]="true">
+      <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </app-ui-input>
+    
+    <div class="form-actions">
+      <a href="#" class="forgot-password">Şifremi Unuttum?</a>
+    </div>
+    
+    <app-ui-button variant="primary" type="submit" class="submit-btn">
+      Giriş Yap
+    </app-ui-button>
+  </form>
+  
+  <div class="auth-card-footer">
+    <p class="footer-text">
+      Hesabınız yok mu? 
+      <a routerLink="/signup" class="footer-link">Kayıt ol</a>
+    </p>
+  </div>
+</div>

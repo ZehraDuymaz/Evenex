@@ -1,0 +1,88 @@
+<div class="home-container">
+  <app-header></app-header>
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-inner">
+      <div class="filter-item">
+        <i class="icon">📍</i>
+        <select class="filter-select">
+          <option>Şehir</option>
+          <option>Istanbul</option>
+          <option>Ankara</option>
+          <option>Izmir</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <i class="icon">🗓️</i>
+        <select class="filter-select">
+          <option>Tüm Tarihler</option>
+          <option>Bugün</option>
+          <option>Yarın</option>
+          <option>Hafta Sonu</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <i class="icon">🎟️</i>
+        <select class="filter-select">
+          <option>Tüm Kategoriler</option>
+          <option>Müzik</option>
+          <option>Sahne</option>
+          <option>Spor</option>
+        </select>
+      </div>
+      <button class="filter-btn">Keşfet</button>
+    </div>
+  </div>
+
+  <!-- Parallax Hero -->
+  <header class="parallax-hero" [style.--parallax-bg]="'url(' + popularEvents[currentHeroIndex].imageUrl + ')'">
+    <button class="hero-nav-btn prev" (click)="onUserSlide('prev')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="parallax-content">
+      <h1 class="hero-title">{{ popularEvents[currentHeroIndex].title }}</h1>
+      <p style="font-size: 1.5rem; color: #e2e8f0; margin-bottom: 2rem;">{{ popularEvents[currentHeroIndex].date }} • {{ popularEvents[currentHeroIndex].location }}</p>
+      <button class="action-btn">Hemen Satın Al</button>
+    </div>
+    <button class="hero-nav-btn next" (click)="onUserSlide('next')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </header>
+
+  <!-- Popular Events -->
+  <section class="popular-events-section">
+    <h2 class="section-title">Popüler Etkinlikler</h2>
+    <div class="events-scroll-container">
+      @for (event of popularEvents; track event.id) {
+        <article class="event-card">
+          <div class="event-image">
+            <img [src]="event.imageUrl" [alt]="event.title" />
+          </div>
+          <div class="event-details">
+            <h3 class="event-title">{{ event.title }}</h3>
+            <p class="event-location">{{ event.location }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h2>Evenex</h2>
+        <p>Biletini al, eğlenceye katıl.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">Hakkımızda</a>
+        <a href="#">İletişim</a>
+        <a href="#">Gizlilik Politikası</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Evenex. Tüm hakları saklıdır.
+    </div>
+  </footer>
+</div>

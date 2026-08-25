@@ -1,0 +1,41 @@
+<div class="settings-container">
+  <div class="header">
+    <h2 class="title">Kullanıcı Ayarları</h2>
+    <p class="subtitle">Kişisel bilgilerinizi ve organizatör profili detaylarınızı yönetin.</p>
+  </div>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="settings-form">
+    <div class="form-section">
+      <h3>Profil Bilgileri</h3>
+      <div class="form-grid">
+        <app-ui-input 
+          label="Ad Soyad" 
+          [value]="settingsForm.get('fullName')?.value"
+          (input)="settingsForm.patchValue({fullName: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="E-posta Adresi" 
+          type="email"
+          [value]="settingsForm.get('email')?.value"
+          (input)="settingsForm.patchValue({email: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Telefon Numarası" 
+          type="tel"
+          [value]="settingsForm.get('phone')?.value"
+          (input)="settingsForm.patchValue({phone: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Firma / Organizatör Adı" 
+          [value]="settingsForm.get('companyName')?.value"
+          (input)="settingsForm.patchValue({companyName: $any($event.target).value})"
+        ></app-ui-input>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <div class="success-message" *ngIf="isSaved">Ayarlar başarıyla kaydedildi!</div>
+      <app-ui-button variant="primary" type="submit" [class.disabled]="!settingsForm.valid">Değişiklikleri Kaydet</app-ui-button>
+    </div>
+  </form>
+</div>
