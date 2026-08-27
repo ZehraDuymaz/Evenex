@@ -19,6 +19,22 @@ public class VenueController : ControllerBase
         _hashids = hashids;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll () => Ok(await _venueService.GetAllVenuesAsync());
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetVenueById (string id)
+    {
+        try
+        {
+            return Ok(await _venueService.GetByIdAsync(id));
+        }
+        catch (KeyNotFoundException exErr)
+        {
+            return NotFound(exErr.Message);
+        } 
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {

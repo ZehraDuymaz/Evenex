@@ -38,8 +38,6 @@ public class SectionController : ControllerBase
         string userIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
 
         var newSectionId = await _sectionService.CreateVenueSectionAsync(dto, userEmail, userIP);
-        
-        string eId = _hashids.Encode(newSectionId);
 
         return Ok(new { Message = "Yeni Venue Section Oluşturuldu!", VenueId = newSectionId });
     }
