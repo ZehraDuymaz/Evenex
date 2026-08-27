@@ -11,6 +11,7 @@ using Scalar.AspNetCore;
 using HashidsNet;
 using Evenex.Application.Events;
 using Evenex.Application.Venues;
+using Evenex.Application.VenueSections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,12 +31,14 @@ builder.Services.AddSingleton<IHashids>(new Hashids("EvenexSuperSecretDeliciousD
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<VenueService>();
+builder.Services.AddScoped<SectionService>();
 
 
 //Authentication and Authorization Servisleri
@@ -69,7 +72,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
-// ── Controller'lar + OpenAPI ─────────────────────────────────────────────────
+// Controllers
 builder.Services.AddControllers();
 builder.Services.AddOpenApi(options =>
 {

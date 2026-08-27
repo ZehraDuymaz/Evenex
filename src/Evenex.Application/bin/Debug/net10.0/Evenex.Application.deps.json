@@ -10,10 +10,19 @@
         "dependencies": {
           "Evenex.Common": "1.0.0",
           "Evenex.Domain": "1.0.0",
+          "Hashids.net": "1.7.0",
           "Microsoft.EntityFrameworkCore": "10.0.10"
         },
         "runtime": {
           "Evenex.Application.dll": {}
+        }
+      },
+      "Hashids.net/1.7.0": {
+        "runtime": {
+          "lib/net7.0/Hashids.net.dll": {
+            "assemblyVersion": "1.7.0.0",
+            "fileVersion": "1.7.0.0"
+          }
         }
       },
       "Microsoft.EntityFrameworkCore/10.0.10": {
@@ -152,6 +161,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Hashids.net/1.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TuQ8ns5c+eeIOHSgJdwCLb0nWzKqn2gCPSLFoz6nWdhw3tS5Wa43qrwRXT4UJT7XVgHqKssacVU1SGlAOWjeIg==",
+      "path": "hashids.net/1.7.0",
+      "hashPath": "hashids.net.1.7.0.nupkg.sha512"
     },
     "Microsoft.EntityFrameworkCore/10.0.10": {
       "type": "package",

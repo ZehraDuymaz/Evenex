@@ -1,4 +1,3 @@
-
 using System.Security.Claims;
 using Evenex.Application.Venues;
 using HashidsNet;
@@ -23,14 +22,7 @@ public class VenueController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {
-        string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "Yer oluşturmak için hesap oluşturunuz.";
-
-        string userIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-
-        int newVenueId = await _venueService.CreateVenueAsync(dto, userEmail, userIP);
-        
-        string eId = _hashids.Encode(newVenueId);
-
-        return Ok(new { Message = "Yeni Venue Oluşturuldu!", VenueID = eId });
+        var venues = await _venueService.GetAllVenuesAsync();
+        return Ok(venues);
     }
 }

@@ -53,6 +53,14 @@
           }
         }
       },
+      "Hashids.net/1.7.0": {
+        "runtime": {
+          "lib/net7.0/Hashids.net.dll": {
+            "assemblyVersion": "1.7.0.0",
+            "fileVersion": "1.7.0.0"
+          }
+        }
+      },
       "Humanizer.Core/2.14.1": {
         "runtime": {
           "lib/net6.0/Humanizer.dll": {
@@ -925,6 +933,7 @@
         "dependencies": {
           "Evenex.Common": "1.0.0",
           "Evenex.Domain": "1.0.0",
+          "Hashids.net": "1.7.0",
           "Microsoft.EntityFrameworkCore": "10.0.10"
         },
         "runtime": {
@@ -981,6 +990,13 @@
       "sha512": "sha512-gwLD2KfCuwQesP17aVh4h6lpiMPEVt5Lbpndo0ej903hNUUTtyxt3ARdDjmuydBRTAUICc7OVKVbaOvc6SQYXA==",
       "path": "bcrypt.net-next/4.2.0",
       "hashPath": "bcrypt.net-next.4.2.0.nupkg.sha512"
+    },
+    "Hashids.net/1.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TuQ8ns5c+eeIOHSgJdwCLb0nWzKqn2gCPSLFoz6nWdhw3tS5Wa43qrwRXT4UJT7XVgHqKssacVU1SGlAOWjeIg==",
+      "path": "hashids.net/1.7.0",
+      "hashPath": "hashids.net.1.7.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",

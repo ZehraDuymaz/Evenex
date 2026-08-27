@@ -850,6 +850,7 @@
         "dependencies": {
           "Evenex.Common": "1.0.0",
           "Evenex.Domain": "1.0.0",
+          "Hashids.net": "1.7.0",
           "Microsoft.EntityFrameworkCore": "10.0.10"
         },
         "runtime": {

@@ -14,6 +14,10 @@ public class VenueRepository : IVenueRepository
     {
         return await _db.Venues.FirstOrDefaultAsync(e => e.Id == id);
     } 
+    public async Task<IEnumerable<Venue>> GetAllAsync ()
+    {
+        return await _db.Venues.Where(v => !v.IsDeleted).ToListAsync();
+    }
 
     public async Task AddAsync (Venue venue)
     {
