@@ -5,8 +5,8 @@ namespace Evenex.Domain.Repositories;
 public interface IVenueRepository
 {
     Task<Venue?> GetVenueAsync(int id);
-
     Task<IEnumerable<Venue>> GetAllAsync();
-
     Task AddAsync(Venue venue);
+    Task UpdateAsync(Venue venue);
+    Task SoftDeleteAsync(int id);
 }

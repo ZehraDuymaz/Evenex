@@ -5,7 +5,9 @@ namespace Evenex.Domain.Repositories;
 public interface IEventRepository
 {
     Task<Event?> GetEventAsync(int id);
+    Task<IEnumerable<Event>> GetAllEventsAsync();
     Task AddAsync(Event newEvent);
-    
+    Task UpdateAsync (Event newEvent);
+    Task SoftDeleteAsync (int id);
 
 }

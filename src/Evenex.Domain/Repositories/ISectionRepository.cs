@@ -7,6 +7,5 @@ public interface ISectionRepository
 {
     Task<Section?> GetSectionAsync (int id);
 
-
     Task AddAsync (Section section);
 }

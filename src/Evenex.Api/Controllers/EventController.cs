@@ -20,6 +20,22 @@ public class EventController : ControllerBase
         _hashids = hashids;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll () => Ok(await _eventService.GetEventsAsync());
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetEventById (string id)
+    {
+        try
+        {
+            return Ok(await _eventService.GetEventByIdAsync(id));
+        }
+        catch (KeyNotFoundException exErr)
+        {
+            return NotFound(exErr.Message);
+        } 
+    }
+
     [HttpPost]
     // creating the actions for the event 
     public async Task<IActionResult> CreateNewEvent([FromBody] CreateEventDto dto)

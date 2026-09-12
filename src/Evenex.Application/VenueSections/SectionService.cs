@@ -28,7 +28,8 @@ public class SectionService
 
         var responseDtos = rawVenues.Select(venue => new VenueResponseDto(
             Id: _hashids.Encode(venue.Id), 
-            Name: venue.Name
+            Name: venue.Name,
+            Address: venue.Address
         )).ToList();
 
         return responseDtos;
