@@ -38,7 +38,12 @@ public class VenueController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {
-        var venues = await _venueService.GetAllVenuesAsync();
-        return Ok(venues);
+        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Hesap oluşturunuz";
+
+        var userIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+
+        var newVenueId = await _venueService.CreateVenueAsync(dto, userEmail, userIp);
+
+        return Ok(newVenueId);
     }
 }
