@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Evenex.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9375faec5748fb4adb8654be96dcdc6b3d8d7006")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+10194a02a99da9f638ed570ee9758de22ed6dc0f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Evenex.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Evenex.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
