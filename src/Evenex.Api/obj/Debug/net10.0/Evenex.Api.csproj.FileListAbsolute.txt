@@ -172,3 +172,4 @@
 /home/deniz/cs/Evenex/src/Evenex.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /home/deniz/cs/Evenex/src/Evenex.Api/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /home/deniz/cs/Evenex/src/Evenex.Api/bin/Debug/net10.0/Hashids.net.dll
+/home/deniz/cs/Evenex/src/Evenex.Api/bin/Debug/net10.0/AutoMapper.dll
