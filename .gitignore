@@ -1,13 +1,6 @@
-# Build çıktıları
-**/bin/
-**/obj/
-
-# IDE
-.vs/
-*.user
-*.suo
-.vscode/
-
-# Secrets
-scripts/.env
-**/appsettings.Development.json
+<<<<<<< HEAD
+src/*/obj/
+src/*/bin/
+=======
+# whatever was in the feature branch
+>>>>>>> feature/db-migrations
