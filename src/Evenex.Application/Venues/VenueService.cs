@@ -23,12 +23,12 @@ public class VenueService
     {
         var rawVenues = await _venueRepo.GetAllAsync();
         
-        var responseDtos = rawVenues.Select(venue => new VenueResponseDto {
-            Id = _hashids.Encode(venue.Id),
-            Name = venue.Name,
-            Address = venue.Address,
-            Capacity = 0
-        }).ToList();
+        var responseDtos = rawVenues.Select(venue => new VenueResponseDto(
+            _hashids.Encode(venue.Id),
+            venue.Name,
+            venue.Address,
+            0
+        )).ToList();
 
         return responseDtos;
     }
@@ -40,7 +40,7 @@ public class VenueService
         int realVenueId = decodedIds[0];
         var venue = await _venueRepo.GetVenueAsync(realVenueId) ?? throw new Exception("Mekan bulunamadı: {id}");
         string eId = _hashids.Encode(venue.Id);
-        return new VenueResponseDto(eId, venue.Name, venue.Address);
+        return new VenueResponseDto(eId, venue.Name, venue.Address, 0);
     } 
 
     public async Task<string> CreateVenueAsync (CreateVenueDto dto, string userEmail, string userIp)
@@ -79,7 +79,7 @@ public class VenueService
 
         string eId = _hashids.Encode(venue.Id);
 
-        return new VenueResponseDto(eId, venue.Name, venue.Address);
+        return new VenueResponseDto(eId, venue.Name, venue.Address, 0);
     }
     public async Task DeleteAsync (string id)
     {
