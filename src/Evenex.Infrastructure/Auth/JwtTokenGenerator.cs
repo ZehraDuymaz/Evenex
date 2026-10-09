@@ -5,6 +5,7 @@ using Evenex.Application.Auth;
 using Evenex.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using HashidsNet;
 
 namespace Evenex.Infrastructure.Auth;
 
@@ -12,18 +13,21 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly IConfiguration _config;
     private readonly RsaSecurityKey _privateKey;
+    private readonly IHashids _hashids;
 
-    public JwtTokenGenerator(IConfiguration config, RsaSecurityKey privateKey) 
+    public JwtTokenGenerator(IConfiguration config, RsaSecurityKey privateKey, IHashids hashids) 
     {
         _config = config;
         _privateKey = privateKey;
+        _hashids = hashids;
     }
 
     public string GenerateToken(User user)
-    {
+    {   
+        
         var claims = new []
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, _hashids.Encode(user.Id)),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };

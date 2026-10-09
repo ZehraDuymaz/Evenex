@@ -1,4 +1,3 @@
-
 using System.Security.Claims;
 using Evenex.Application.Venues;
 using HashidsNet;
@@ -20,17 +19,31 @@ public class VenueController : ControllerBase
         _hashids = hashids;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll () => Ok(await _venueService.GetAllVenuesAsync());
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetVenueById (string id)
+    {
+        try
+        {
+            return Ok(await _venueService.GetByIdAsync(id));
+        }
+        catch (KeyNotFoundException exErr)
+        {
+            return NotFound(exErr.Message);
+        } 
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {
-        string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "Yer oluşturmak için hesap oluşturunuz.";
+        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Hesap oluşturunuz";
 
-        string userIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+        var userIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
 
-        int newVenueId = await _venueService.CreateVenueAsync(dto, userEmail, userIP);
-        
-        string eId = _hashids.Encode(newVenueId);
+        var newVenueId = await _venueService.CreateVenueAsync(dto, userEmail, userIp);
 
-        return Ok(new { Message = "Yeni Venue Oluşturuldu!", VenueID = eId });
+        return Ok(newVenueId);
     }
 }

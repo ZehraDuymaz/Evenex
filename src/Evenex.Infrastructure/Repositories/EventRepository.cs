@@ -14,9 +14,27 @@ public class EventRepository : IEventRepository
     {
         return await _db.Events.FirstOrDefaultAsync(e => e.Id == id);
     }
+    public async Task<IEnumerable<Event>> GetAllEventsAsync ()
+    {
+        return await _db.Events.Where(e => !e.IsDeleted).ToListAsync();
+    }
 
     public async Task AddAsync (Event newEvent)
     {
         await _db.Events.AddAsync(newEvent);
+    }
+    public Task UpdateAsync (Event newEvent)
+    {
+        _db.Events.Update(newEvent);
+        return Task.CompletedTask;
+    }
+    public async Task SoftDeleteAsync (int id)
+    {
+        var newEvent = await _db.Events.FirstOrDefaultAsync(v => v.Id == id);
+        if (newEvent is null) return;
+
+        newEvent.IsDeleted = true;
+        newEvent.ModifiedDate = DateTime.UtcNow;
+        _db.Events.Update(newEvent);
     }
 }

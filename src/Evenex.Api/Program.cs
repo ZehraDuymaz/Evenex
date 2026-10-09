@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Evenex.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 using Evenex.Application.Auth;
 using Evenex.Domain.Repositories;
 using Evenex.Infrastructure.Repositories;
@@ -11,53 +10,32 @@ using Scalar.AspNetCore;
 using HashidsNet;
 using Evenex.Application.Events;
 using Evenex.Application.Venues;
+using Evenex.Application.VenueSections;
+using Evenex.Application.Abstraction;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Database bağlama
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// rsa => encryption için 
-using var rsa = RSA.Create(2048);
-var publicKey = new RsaSecurityKey(rsa.ExportParameters(false));
-var privateKey = new RsaSecurityKey(rsa.ExportParameters(true));
-
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton(publicKey);
-builder.Services.AddSingleton(privateKey);
-builder.Services.AddSingleton<IHashids>(new Hashids("EvenexSuperSecretDeliciousDesserts", 8));
+builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<VenueService>();
+builder.Services.AddScoped<SectionService>();
 
-
-//Authentication and Authorization Servisleri
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-});
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
-    
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true, 
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = publicKey,
-    };    
-});
+// authN için Configuration
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAuthorization();
 
@@ -69,7 +47,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
-// ── Controller'lar + OpenAPI ─────────────────────────────────────────────────
+// Controllers
 builder.Services.AddControllers();
 builder.Services.AddOpenApi(options =>
 {
@@ -101,7 +79,6 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
-
 
 
 if (app.Environment.IsDevelopment())

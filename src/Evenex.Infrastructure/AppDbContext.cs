@@ -21,19 +21,21 @@ public class AppDbContext : DbContext
     public DbSet<Venue> Venues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
+    {
     // Soft delete kullandığımız için fiziksel cascade delete'e hiç ihtiyacımız yok.
     // Tüm foreign key'leri Restrict yapıyoruz — bir kayıt, ona bağlı başka
     // kayıtlar varken asla otomatik silinmeyecek; silme işlemi her zaman
     // IsDeleted = true ile Application katmanında kontrollü şekilde yapılacak.
+
     foreach (var relationship in modelBuilder.Model.GetEntityTypes()
                  .SelectMany(e => e.GetForeignKeys()))
     {
         relationship.DeleteBehavior = DeleteBehavior.Restrict;
+        modelBuilder.Entity<Venue>().HasQueryFilter(v => !v.IsDeleted);
     }
 
     base.OnModelCreating(modelBuilder);
-}
+    }
 }
 
 
