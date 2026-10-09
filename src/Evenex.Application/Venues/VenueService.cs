@@ -22,12 +22,13 @@ public class VenueService
     public async Task<IEnumerable<VenueResponseDto>> GetAllVenuesAsync ()
     {
         var rawVenues = await _venueRepo.GetAllAsync();
-
-        var responseDtos = rawVenues.Select(venue => new VenueResponseDto(
-            Id: _hashids.Encode(venue.Id),
-            Name: venue.Name,
-            Address: venue.Address
-        )).ToList();
+        
+        var responseDtos = rawVenues.Select(venue => new VenueResponseDto {
+            Id = _hashids.Encode(venue.Id),
+            Name = venue.Name,
+            Address = venue.Address,
+            Capacity = 0
+        }).ToList();
 
         return responseDtos;
     }

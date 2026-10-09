@@ -1,3 +1,4 @@
+using Evenex.Common.Dtos;
 namespace Evenex.Application.Venues;
 
 /// <summary>
@@ -8,5 +9,11 @@ namespace Evenex.Application.Venues;
 
 public record CreateVenueDto (string Name, string Address);
 public record UpdateVenueDto (string Name, string Address);
-public record VenueResponseDto(string Id, string Name, string Address);
+// !! BaseDto
+public record VenueResponseDto (
+    string Id,
+    string Name,
+    string Address,
+    int Capacity
+) : BaseResponseDto(Id);
 

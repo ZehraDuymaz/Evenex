@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+35073a5c3541da91ff95d12d0279da8129541dfb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcee43ff0a5375a32faaba0141dee5d6c9df77c1")]
 [assembly: System.Reflection.AssemblyProductAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Evenex.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
