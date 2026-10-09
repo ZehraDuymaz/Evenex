@@ -9,6 +9,8 @@ using Evenex.Infrastructure.Repositories;
 using Evenex.Infrastructure.Auth;
 using Scalar.AspNetCore;
 using HashidsNet;
+using Evenex.Application.Events;
+using Evenex.Application.Venues;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,10 +28,14 @@ builder.Services.AddSingleton(privateKey);
 builder.Services.AddSingleton<IHashids>(new Hashids("EvenexSuperSecretDeliciousDesserts", 8));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<VenueService>();
 
 
 //Authentication and Authorization Servisleri

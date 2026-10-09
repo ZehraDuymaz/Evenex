@@ -1,0 +1,50 @@
+<div class="create-venue-container">
+  <div class="header">
+    <div class="header-left">
+      <h2 class="title">Mekan Oluştur</h2>
+      <p class="subtitle">Yeni bir etkinlik mekanı ekleyin ve kapasite, konum gibi detaylarını belirleyin.</p>
+    </div>
+    <div class="header-right">
+      <app-ui-button variant="default" [routerLink]="['/admin/venues']">İptal</app-ui-button>
+    </div>
+  </div>
+
+  <form [formGroup]="venueForm" (ngSubmit)="onSubmit()" class="venue-form">
+    <div class="form-section">
+      <h3>Temel Bilgiler</h3>
+      <div class="form-grid">
+        <app-ui-input 
+          label="Mekan Adı" 
+          [value]="venueForm.get('name')?.value" 
+          (input)="venueForm.patchValue({name: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Kapasite" 
+          type="number"
+          [value]="venueForm.get('capacity')?.value"
+          (input)="venueForm.patchValue({capacity: $any($event.target).value})"
+        ></app-ui-input>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Konum Detayları</h3>
+      <div class="form-grid">
+        <app-ui-input 
+          label="Şehir" 
+          [value]="venueForm.get('city')?.value"
+          (input)="venueForm.patchValue({city: $any($event.target).value})"
+        ></app-ui-input>
+        <app-ui-input 
+          label="Açık Adres" 
+          [value]="venueForm.get('address')?.value"
+          (input)="venueForm.patchValue({address: $any($event.target).value})"
+        ></app-ui-input>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <app-ui-button variant="primary" type="submit" [class.disabled]="!venueForm.valid">Mekanı Kaydet</app-ui-button>
+    </div>
+  </form>
+</div>

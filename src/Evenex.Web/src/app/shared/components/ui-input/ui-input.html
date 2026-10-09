@@ -1,0 +1,20 @@
+<div class="input-group">
+  <label class="input-label" *ngIf="label" [class.font-mono]="mono">{{ label }}</label>
+  <div class="input-wrapper">
+    <div class="icon-wrapper" *ngIf="hasIcon">
+      <ng-content select="[left-icon]"></ng-content>
+    </div>
+    
+    <input 
+      [type]="type" 
+      [value]="value" 
+      [readonly]="readonly" 
+      class="input-field"
+      [class.has-icon]="hasIcon"
+      [class.font-mono]="mono" />
+      
+    <div class="action-wrapper">
+      <ng-content select="[right-action]"></ng-content>
+    </div>
+  </div>
+</div>
