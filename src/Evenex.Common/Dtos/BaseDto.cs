@@ -5,4 +5,5 @@ namespace Evenex.Common.Dtos;
 /// Sadece her response'ta ortak olan alanları taşır.
 /// </summary>
 
-public abstract record BaseResponseDto(string Id);
+public abstract record BaseDto(string Id);
+

@@ -15,5 +15,5 @@ public record VenueResponseDto (
     string Name,
     string Address,
     int Capacity
-) : BaseResponseDto(Id);
+) : BaseDto(Id);
 
