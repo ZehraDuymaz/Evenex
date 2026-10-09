@@ -1,14 +1,13 @@
-# .NET build çıktıları — bunlar asla Git'e girmemeli
-bin/
-obj/
+# Build çıktıları
+**/bin/
+**/obj/
+
+# IDE
+.vs/
 *.user
 *.suo
-.vs/
+.vscode/
 
-# User secrets ve env dosyaları
-**/appsettings.*.json
+# Secrets
 scripts/.env
-
-# Test sonuçları
-TestResults/
-coverage/
+**/appsettings.Development.json
