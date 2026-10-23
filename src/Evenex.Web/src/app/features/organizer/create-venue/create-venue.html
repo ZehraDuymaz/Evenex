@@ -9,42 +9,32 @@
     </div>
   </div>
 
-  <form [formGroup]="venueForm" (ngSubmit)="onSubmit()" class="venue-form">
+  @if (errorMessage()) {
+    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
+
+  <form [formGroup]="venueForm" (ngSubmit)="onSubmit()" class="venue-form" novalidate>
     <div class="form-section">
       <h3>Temel Bilgiler</h3>
       <div class="form-grid">
-        <app-ui-input 
-          label="Mekan Adı" 
-          [value]="venueForm.get('name')?.value" 
-          (input)="venueForm.patchValue({name: $any($event.target).value})"
-        ></app-ui-input>
-        <app-ui-input 
-          label="Kapasite" 
-          type="number"
-          [value]="venueForm.get('capacity')?.value"
-          (input)="venueForm.patchValue({capacity: $any($event.target).value})"
-        ></app-ui-input>
+        <app-ui-input label="Mekan Adı" formControlName="name" [error]="fieldError('name')"></app-ui-input>
+        <app-ui-input label="Kapasite" type="number" formControlName="capacity"
+          hint="Yakında: bölümlerden hesaplanacak"></app-ui-input>
       </div>
     </div>
 
     <div class="form-section">
       <h3>Konum Detayları</h3>
       <div class="form-grid">
-        <app-ui-input 
-          label="Şehir" 
-          [value]="venueForm.get('city')?.value"
-          (input)="venueForm.patchValue({city: $any($event.target).value})"
-        ></app-ui-input>
-        <app-ui-input 
-          label="Açık Adres" 
-          [value]="venueForm.get('address')?.value"
-          (input)="venueForm.patchValue({address: $any($event.target).value})"
-        ></app-ui-input>
+        <app-ui-input label="Şehir" formControlName="city" hint="Yakında"></app-ui-input>
+        <app-ui-input label="Açık Adres" formControlName="address" [error]="fieldError('address')"></app-ui-input>
       </div>
     </div>
 
     <div class="form-actions">
-      <app-ui-button variant="primary" type="submit" [class.disabled]="!venueForm.valid">Mekanı Kaydet</app-ui-button>
+      <app-ui-button variant="primary" type="submit" [class.disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Kaydediliyor...' : 'Mekanı Kaydet' }}
+      </app-ui-button>
     </div>
   </form>
 </div>

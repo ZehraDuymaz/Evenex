@@ -1,0 +1,25 @@
+<div class="select-group">
+  @if (label) {
+    <label class="select-label" [for]="selectId">{{ label }}</label>
+  }
+
+  <select
+    [id]="selectId"
+    class="select-field"
+    [class.invalid]="!!error"
+    [disabled]="isDisabled()"
+    (change)="handleChange($event)"
+    (blur)="handleBlur()">
+    <!-- value="" olan placeholder: "henüz seçilmedi" anlamında, Validators.required bunu boş sayar -->
+    <option value="" disabled [selected]="currentValue() === ''">{{ placeholder }}</option>
+    @for (option of options; track option.value) {
+      <option [value]="option.value" [selected]="option.value === currentValue()">{{ option.label }}</option>
+    }
+  </select>
+
+  @if (error) {
+    <span class="select-error">{{ error }}</span>
+  } @else if (hint) {
+    <span class="select-hint">{{ hint }}</span>
+  }
+</div>

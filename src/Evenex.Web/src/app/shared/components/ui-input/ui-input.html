@@ -1,20 +1,37 @@
 <div class="input-group">
-  <label class="input-label" *ngIf="label" [class.font-mono]="mono">{{ label }}</label>
+  @if (label) {
+    <label class="input-label" [for]="inputId" [class.font-mono]="mono">{{ label }}</label>
+  }
   <div class="input-wrapper">
-    <div class="icon-wrapper" *ngIf="hasIcon">
-      <ng-content select="[left-icon]"></ng-content>
-    </div>
-    
-    <input 
-      [type]="type" 
-      [value]="value" 
-      [readonly]="readonly" 
+    @if (hasIcon) {
+      <div class="icon-wrapper">
+        <ng-content select="[left-icon]"></ng-content>
+      </div>
+    }
+
+    <input
+      [id]="inputId"
+      [type]="type"
+      [value]="currentValue()"
+      [readonly]="readonly"
+      [disabled]="isDisabled()"
+      [placeholder]="placeholder"
+      [attr.autocomplete]="autocomplete || null"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
       class="input-field"
       [class.has-icon]="hasIcon"
+      [class.invalid]="!!error"
       [class.font-mono]="mono" />
-      
+
     <div class="action-wrapper">
       <ng-content select="[right-action]"></ng-content>
     </div>
   </div>
+
+  @if (error) {
+    <span class="input-error">{{ error }}</span>
+  } @else if (hint) {
+    <span class="input-hint">{{ hint }}</span>
+  }
 </div>
