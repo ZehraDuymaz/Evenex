@@ -4,6 +4,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    // TypeScript 6 outDir verildiğinde rootDir'i açıkça ister; yoksa çıktı klasör yapısını kendisi tahmin eder.
+    "rootDir": "./src",
     "types": [
       "vitest/globals"
     ]
