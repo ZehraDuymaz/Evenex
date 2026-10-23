@@ -2,6 +2,10 @@ using Evenex.Domain.Entities;
 
 namespace Evenex.Domain.Repositories;
 
+/// <summary>
+/// Etkinlik bölümü verisine erişim sözleşmesi (interface). Domain katmanı sadece "ne yapılacağını" bilir;
+/// "nasıl" yapılacağı (EF Core, SQL) Infrastructure katmanındaki implementasyondadır.
+/// </summary>
 public interface IEventSectionRepository
 {
     Task<Event?> GetEventById (int id);

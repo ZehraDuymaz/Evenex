@@ -1,61 +1,56 @@
-using System.Formats.Asn1;
+using AutoMapper;
+using Evenex.Application.Common;
 using Evenex.Domain.Entities;
-using Evenex.Domain.Enums;
 using Evenex.Domain.Repositories;
 using HashidsNet;
-using Evenex.Application.Venues;
 
 namespace Evenex.Application.VenueSections;
 
+/// <summary>
+/// Mekân bölümleri (Section) için iş kuralları. Her bölüm bir mekâna (Venue) aittir.
+/// </summary>
 public class SectionService
 {
-    private readonly ISectionRepository _venueSectionRepo;
+    private readonly ISectionRepository _sectionRepo;
+    private readonly IVenueRepository _venueRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHashids _hashids;
-    private readonly IVenueRepository _venueRepo;
-    public SectionService (IUnitOfWork unitOfWork, ISectionRepository sectionRepo, IVenueRepository venueRepo, IHashids hashids) 
+    private readonly IMapper _mapper;
+
+    public SectionService (IUnitOfWork unitOfWork, ISectionRepository sectionRepo, IVenueRepository venueRepo, IHashids hashids, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _venueSectionRepo = sectionRepo;
-        _hashids = hashids;
+        _sectionRepo = sectionRepo;
         _venueRepo = venueRepo;
+        _hashids = hashids;
+        _mapper = mapper;
     }
 
-    public async Task<IEnumerable<VenueResponseDto>> GetAllVenuesAsync()
+    public async Task<IEnumerable<SectionResponseDto>> GetSectionsByVenueAsync (string venueId)
     {
-        
-        var rawVenues = await _venueRepo.GetAllAsync();
-
-        var responseDtos = rawVenues.Select(venue => new VenueResponseDto(
-            Id: _hashids.Encode(venue.Id), 
-            Name: venue.Name,
-            Address: venue.Address,
-            Capacity: 0
-        )).ToList();
-
-        return responseDtos;
+        int realVenueId = _hashids.DecodeId(venueId, "Mekan");
+        var sections = await _sectionRepo.GetSectionsByVenueIdAsync(realVenueId);
+        return _mapper.Map<List<SectionResponseDto>>(sections);
     }
 
-    public async Task<int> CreateVenueSectionAsync (CreateSectionDto dto, string userEmail, string userIp)
+    public async Task<SectionResponseDto> CreateVenueSectionAsync (CreateSectionDto dto, string userEmail, string userIp)
     {
-        Console.WriteLine($"\n--- DEBUG: RECEIVED VENUE ID: '{dto.VenueId}' ---\n");
-        var decodedIds = _hashids.Decode(dto.VenueId);
-        if (decodedIds.Length == 0) throw new Exception ("Venue bulunamadı.");
-        int realVenueId = decodedIds[0];
-        var newSection = new Section ()
-        {
-            VenueId = realVenueId,
-            Name = dto.Name,
-            Type = dto.Type,
-            CreatedUser = userEmail,
-            CreatedDate = DateTime.UtcNow,
-            CreatedIP = userIp,
-            IsDeleted = false
-        };
+        int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
 
-        await _venueSectionRepo.AddAsync(newSection);
+        // Bölüm eklenecek mekân gerçekten var mı (ve silinmemiş mi)?
+        _ = await _venueRepo.GetVenueAsync(realVenueId)
+            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
+
+        var newSection = _mapper.Map<Section>(dto);
+        newSection.VenueId = realVenueId;
+        newSection.CreatedUser = userEmail;
+        newSection.CreatedDate = DateTime.UtcNow;
+        newSection.CreatedIP = userIp;
+        newSection.IsDeleted = false;
+
+        await _sectionRepo.AddAsync(newSection);
         await _unitOfWork.SaveChangesAsync();
 
-        return newSection.Id;
+        return _mapper.Map<SectionResponseDto>(newSection);
     }
 }

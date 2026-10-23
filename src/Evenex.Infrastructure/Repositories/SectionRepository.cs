@@ -12,11 +12,11 @@ public class SectionRepository : ISectionRepository
 
     public async Task<Section?> GetSectionAsync (int id)
     {
-        return await _db.Sections.FirstOrDefaultAsync(e => e.Id == id);
+        return await _db.Sections.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
     }
 
-    // list of sections 
-    public async Task<IEnumerable<Section>> GetSectionByVenueIdAsync (int venueId)
+    // Bir mekâna ait, silinmemiş tüm bölümler
+    public async Task<IEnumerable<Section>> GetSectionsByVenueIdAsync (int venueId)
     {
         return await _db.Sections.Where(s => s.VenueId == venueId && !s.IsDeleted).ToListAsync();
     }

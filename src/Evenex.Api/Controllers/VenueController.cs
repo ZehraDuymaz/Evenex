@@ -1,49 +1,57 @@
-using System.Security.Claims;
+using Evenex.Application.Abstraction;
 using Evenex.Application.Venues;
-using HashidsNet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Evenex.Api.Controllers;
 
+/// <summary>
+/// Mekân endpoint'leri: localhost:5177/api/venue
+/// Okuma herkese açık; oluşturma/güncelleme/silme için geçerli bir JWT gerekir ([Authorize]).
+/// Hatalar (bulunamadı, geçersiz id vs.) GlobalExceptionHandler tarafından HTTP koduna çevrilir.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
-
 public class VenueController : ControllerBase
 {
     private readonly VenueService _venueService;
-    private readonly IHashids _hashids;
+    private readonly ICurrentUserService _currentUser;
 
-    public VenueController (VenueService venueService, IHashids hashids)
+    public VenueController (VenueService venueService, ICurrentUserService currentUser)
     {
         _venueService = venueService;
-        _hashids = hashids;
+        _currentUser = currentUser;
     }
+
+    // İsteği yapan istemcinin IP adresi (audit alanları için: CreatedIP / ModifiedIP)
+    private string ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
     [HttpGet]
     public async Task<IActionResult> GetAll () => Ok(await _venueService.GetAllVenuesAsync());
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetVenueById (string id)
-    {
-        try
-        {
-            return Ok(await _venueService.GetByIdAsync(id));
-        }
-        catch (KeyNotFoundException exErr)
-        {
-            return NotFound(exErr.Message);
-        } 
-    }
+    public async Task<IActionResult> GetVenueById (string id) => Ok(await _venueService.GetByIdAsync(id));
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Hesap oluşturunuz";
+        var created = await _venueService.CreateVenueAsync(dto, _currentUser.Email, ClientIp);
 
-        var userIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+        // 201 Created + "Location: /api/venue/{id}" header'ı + oluşan kaydın kendisi
+        return CreatedAtAction(nameof(GetVenueById), new { id = created.Id }, created);
+    }
 
-        var newVenueId = await _venueService.CreateVenueAsync(dto, userEmail, userIp);
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateVenue (string id, [FromBody] UpdateVenueDto dto)
+        => Ok(await _venueService.UpdateAsync(id, dto, _currentUser.Email, ClientIp));
 
-        return Ok(newVenueId);
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteVenue (string id)
+    {
+        await _venueService.DeleteAsync(id);
+        return NoContent(); // 204: başarılı, geri dönecek içerik yok
     }
 }

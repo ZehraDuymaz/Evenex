@@ -5,6 +5,11 @@ using System.Security.Claims;
 
 namespace Evenex.Infrastructure.Auth;
 
+/// <summary>
+/// ICurrentUserService'in gerçek implementasyonu. Authentication middleware token'ı doğruladıktan sonra
+/// claim'leri HttpContext.User'a koyar; bu sınıf da oradan okur.
+/// Token yoksa / geçersizse tüm değerler boş döner (Id = 0, Email = "").
+/// </summary>
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -18,7 +23,8 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var idClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);  
+            // Token'daki id hash'li ("wk1JaEWX"), önce gerçek int id'ye çözüyoruz
+            var idClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(idClaim)) return 0;
             var decoded = _hashids.Decode(idClaim);
             if (decoded.Length > 0) return decoded[0];

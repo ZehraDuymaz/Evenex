@@ -1,102 +1,103 @@
-using System.Text;
+using AutoMapper;
+using Evenex.Application.Common;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
 using HashidsNet;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace Evenex.Application.Events;
 
+/// <summary>
+/// Etkinlik iş kuralları. Controller ile repository arasında durur:
+/// id'leri çözer, kuralları kontrol eder, entity ↔ DTO dönüşümünü AutoMapper'a yaptırır.
+/// </summary>
 public class EventService
 {
     private readonly IEventRepository _eventRepo;
+    private readonly IVenueRepository _venueRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHashids _hashids;
+    private readonly IMapper _mapper;
 
-    public EventService (IEventRepository eventRepo, IUnitOfWork unitOfWork, IHashids hashids)
+    public EventService (IEventRepository eventRepo, IVenueRepository venueRepo, IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
     {
         _eventRepo = eventRepo;
+        _venueRepo = venueRepo;
         _unitOfWork = unitOfWork;
         _hashids = hashids;
+        _mapper = mapper;
     }
-    public async Task<int> CreateEventAsync (CreateEventDto dto, string userEmail, string userIp)
+
+    public async Task<EventResponseDto> CreateEventAsync (CreateEventDto dto, string userEmail, string userIp)
     {
+        // ArgumentException -> GlobalExceptionHandler bunu 400 Bad Request'e çevirir
         if (dto.EventDate < DateTime.UtcNow)
-        {
-            throw new Exception("Sadece gelecek tarihler için etkinlik oluşturulabilir.");
-        }
-        var decodedIds = _hashids.Decode(dto.VenueId);
-        if (decodedIds.Length == 0) throw new Exception("Geçersiz Event ID formatı.");
-        int realVenueId = decodedIds[0];
-        // unpack dto and build functionality
-        var newEvent = new Event ()
-        {
-            VenueId = realVenueId,
-            Title = dto.Title,
-            Description = dto.Description,
-            EventDate = dto.EventDate,
-            Status = "Draft", // todo: add a variable of sorf
-            CreatedUser = userEmail,
-            CreatedDate = DateTime.UtcNow,
-            CreatedIP = userIp,
-            IsDeleted = false,
-        };
+            throw new ArgumentException("Sadece gelecek tarihler için etkinlik oluşturulabilir.");
+
+        int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
+
+        // Mekân gerçekten var mı? Kontrol etmezsek SaveChanges'ta foreign key hatası (500) alırız.
+        _ = await _venueRepo.GetVenueAsync(realVenueId)
+            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
+
+        // Title, Description, EventDate AutoMapper ile doluyor; geri kalanları biz set ediyoruz.
+        var newEvent = _mapper.Map<Event>(dto);
+        newEvent.VenueId = realVenueId;
+        newEvent.Status = "Draft"; // Yeni etkinlik taslak olarak başlar, yayınlama sonra eklenecek
+        newEvent.CreatedUser = userEmail;
+        newEvent.CreatedDate = DateTime.UtcNow;
+        newEvent.CreatedIP = userIp;
+        newEvent.IsDeleted = false;
 
         await _eventRepo.AddAsync(newEvent);
-
+        // SaveChanges'tan sonra veritabanı newEvent.Id'yi doldurmuş olur
         await _unitOfWork.SaveChangesAsync();
 
-        return newEvent.Id;
+        return _mapper.Map<EventResponseDto>(newEvent);
     }
+
     public async Task<EventResponseDto> GetEventByIdAsync (string id)
     {
-        var decodedIds = _hashids.Decode(id);
-        if (decodedIds.Length == 0) throw new Exception("Geçersiz Etkinlik id'si");
-        var realEventId = decodedIds[0];
-        var newEvent = await _eventRepo.GetEventAsync(realEventId) ?? throw new Exception ("Etkinlik bulunamadı");
-        string eId = _hashids.Encode(newEvent.Id);
-        return new EventResponseDto(eId, newEvent.Title, newEvent.Description, newEvent.EventDate);
+        int realEventId = _hashids.DecodeId(id, "Etkinlik");
+        var foundEvent = await _eventRepo.GetEventAsync(realEventId)
+            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
+
+        return _mapper.Map<EventResponseDto>(foundEvent);
     }
+
     public async Task<IEnumerable<EventResponseDto>> GetEventsAsync ()
     {
         var rawEvents = await _eventRepo.GetAllEventsAsync();
-
-        var responseDtos = rawEvents.Select(e => new EventResponseDto(
-            Id: _hashids.Encode(e.Id),
-            Title: e.Title,
-            Description: e.Description,
-            EventDate: e.EventDate
-        )).ToList();
-        return responseDtos;
+        return _mapper.Map<List<EventResponseDto>>(rawEvents);
     }
 
-    public async Task<EventResponseDto> UpdateAsync(string id, EventResponseDto dto, string updatedByMail, string updatedByIp)
+    public async Task<EventResponseDto> UpdateAsync(string id, UpdateEventDto dto, string updatedByMail, string updatedByIp)
     {
-        var decodedIds = _hashids.Decode(id);
-        if (decodedIds.Length == 0) throw new Exception("Geçersiz Event ID formatı.");
-        int realVenueId = decodedIds[0];
-        var newEvent = await _eventRepo.GetEventAsync(realVenueId) ?? throw new Exception("Etkinlik bulunamadı: {id}");
+        if (dto.EventDate < DateTime.UtcNow)
+            throw new ArgumentException("Etkinlik tarihi geçmiş bir tarihe alınamaz.");
 
-        newEvent.Title = dto.Title;
-        newEvent.Description = dto.Description;
-        newEvent.EventDate = dto.EventDate;
-        newEvent.ModifiedUser = updatedByMail;
-        newEvent.ModifiedDate = DateTime.UtcNow;
-        newEvent.ModifiedIP = updatedByIp;
+        int realEventId = _hashids.DecodeId(id, "Etkinlik");
+        var existingEvent = await _eventRepo.GetEventAsync(realEventId)
+            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
-        await _eventRepo.UpdateAsync(newEvent);
+        // Map(kaynak, hedef): yeni nesne oluşturmaz, var olan entity'nin alanlarını DTO'dakilerle günceller
+        _mapper.Map(dto, existingEvent);
+        existingEvent.ModifiedUser = updatedByMail;
+        existingEvent.ModifiedDate = DateTime.UtcNow;
+        existingEvent.ModifiedIP = updatedByIp;
+
+        await _eventRepo.UpdateAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();
-        string eId = _hashids.Encode(newEvent.Id);
-        return new EventResponseDto(eId, newEvent.Title, newEvent.Description, newEvent.EventDate);
+
+        return _mapper.Map<EventResponseDto>(existingEvent);
     }
 
     public async Task DeleteAsync (string id)
     {
-        var decodedIds = _hashids.Decode(id);
-        if (decodedIds.Length == 0) throw new Exception("Geçersiz Event ID formatı.");
-        int realVenueId = decodedIds[0];
-        var venue = await _eventRepo.GetEventAsync(realVenueId) ?? throw new Exception("Etkinlik bulunamadı: {id}");
-        await _eventRepo.SoftDeleteAsync(venue.Id);
-        await _unitOfWork.SaveChangesAsync();       
-    }
+        int realEventId = _hashids.DecodeId(id, "Etkinlik");
+        var existingEvent = await _eventRepo.GetEventAsync(realEventId)
+            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
+        await _eventRepo.SoftDeleteAsync(existingEvent.Id);
+        await _unitOfWork.SaveChangesAsync();
+    }
 }
