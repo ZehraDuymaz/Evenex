@@ -1,45 +1,39 @@
-using System.Security.Claims;
-using Evenex.Application.Venues;
+using Evenex.Application.Abstraction;
 using Evenex.Application.VenueSections;
-using HashidsNet;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace Evenex.Api.Controllers;
 
+/// <summary>
+/// Mekân bölümü endpoint'leri: localhost:5177/api/section
+/// Bölümler her zaman bir mekâna bağlı olduğu için listeleme mekân id'si ile yapılır.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
-
-
 public class SectionController : ControllerBase
 {
     private readonly SectionService _sectionService;
-    private readonly IHashids _hashids;
-    private readonly VenueService _venueService;
-    public SectionController (SectionService sectionService, VenueService venueService, IHashids hashids)
+    private readonly ICurrentUserService _currentUser;
+
+    public SectionController (SectionService sectionService, ICurrentUserService currentUser)
     {
         _sectionService = sectionService;
-        _hashids = hashids;
-        _venueService = venueService;
+        _currentUser = currentUser;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllVenues()
+    private string ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    // GET api/section/venue/{venueId} -> o mekânın tüm bölümleri
+    [HttpGet("venue/{venueId}")]
+    public async Task<IActionResult> GetSectionsByVenue (string venueId)
+        => Ok(await _sectionService.GetSectionsByVenueAsync(venueId));
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> CreateNewSection ([FromBody] CreateSectionDto dto)
     {
-        var venues = await _venueService.GetAllVenuesAsync();
-
-        return Ok(venues);
+        var created = await _sectionService.CreateVenueSectionAsync(dto, _currentUser.Email, ClientIp);
+        return Created($"/api/section/{created.Id}", created);
     }
-
-    [HttpPost] 
-    public async Task<IActionResult> CreateNewSection ([FromBody] CreateSectionDto dto) 
-    {   
-        string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "Yer Bölümü oluşturmak için ilk yer seçiniz.";
-        string userIP = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-
-        var newSectionId = await _sectionService.CreateVenueSectionAsync(dto, userEmail, userIP);
-
-        return Ok(new { Message = "Yeni Venue Section Oluşturuldu!", VenueId = newSectionId });
-    }
- 
 }

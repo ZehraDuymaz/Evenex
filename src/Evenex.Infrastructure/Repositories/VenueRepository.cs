@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Evenex.Infrastructure.Repositories;
 
+/// <summary>
+/// Mekân sorguları. Not: AppDbContext'teki global query filter sayesinde silinmiş
+/// mekânlar buradaki hiçbir sorguda gelmez.
+/// </summary>
 public class VenueRepository : IVenueRepository
 {
     private readonly AppDbContext _db;
@@ -22,6 +26,7 @@ public class VenueRepository : IVenueRepository
     {
         await _db.Venues.AddAsync(venue);
     }
+    // Update sadece EF'ye "bu nesne değişti" der; asıl SQL UPDATE, UnitOfWork.SaveChangesAsync'te çalışır
     public Task UpdateAsync (Venue venue)
     {
         _db.Venues.Update(venue);

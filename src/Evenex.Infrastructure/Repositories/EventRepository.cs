@@ -12,7 +12,8 @@ public class EventRepository : IEventRepository
 
     public async Task<Event?> GetEventAsync(int id)
     {
-        return await _db.Events.FirstOrDefaultAsync(e => e.Id == id);
+        // Soft delete edilmiş etkinlikler "yok" sayılır, id ile de getirilemez.
+        return await _db.Events.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
     }
     public async Task<IEnumerable<Event>> GetAllEventsAsync ()
     {
