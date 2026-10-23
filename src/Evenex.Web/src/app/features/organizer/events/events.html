@@ -1,7 +1,37 @@
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="page-header">
   <div>
-    <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--color-text);">Etkinlikler</h2>
-    <p style="color: var(--color-text-muted);">Burada etkinlikleri yönetebilirsiniz.</p>
+    <h2 class="page-title">Etkinlikler</h2>
+    <p class="page-subtitle">Burada etkinlikleri yönetebilirsiniz.</p>
   </div>
   <app-ui-button variant="primary" [routerLink]="['/admin/events/create']">Etkinlik Ekle</app-ui-button>
 </div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger list-alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <div class="state-message">Etkinlikler yükleniyor...</div>
+} @else if (events().length === 0 && !errorMessage()) {
+  <div class="state-message">
+    Henüz hiç etkinlik yok. <a routerLink="/admin/events/create">İlk etkinliği oluşturun.</a>
+  </div>
+} @else {
+  <div class="card-list">
+    @for (event of events(); track event.id) {
+      <article class="list-card">
+        <h3 class="list-card-title">{{ event.title }}</h3>
+        <!-- date pipe: ISO tarihi kullanıcının saat dilimine çevirip Türkçe biçimler, örn. "12 Ara 2026 20:00" -->
+        <p class="list-card-meta">{{ event.eventDate | date: 'd MMM y, HH:mm' }}</p>
+        <p class="list-card-meta">{{ venueName(event.venueId) }}</p>
+        <p class="list-card-meta">{{ event.description }}</p>
+        <div class="list-card-footer">
+          <span class="badge">{{ statusLabel(event.status) }}</span>
+          <button class="link-danger" (click)="deleteEvent(event)" [disabled]="deletingId() === event.id">
+            {{ deletingId() === event.id ? 'Siliniyor...' : 'Sil' }}
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+}

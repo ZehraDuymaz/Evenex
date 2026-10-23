@@ -1,7 +1,35 @@
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="page-header">
   <div>
-    <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--color-text);">Mekanlar</h2>
-    <p style="color: var(--color-text-muted);">Burada mekanları yönetebilirsiniz.</p>
+    <h2 class="page-title">Mekanlar</h2>
+    <p class="page-subtitle">Burada mekanları yönetebilirsiniz.</p>
   </div>
   <app-ui-button variant="primary" [routerLink]="['/admin/venues/create']">Mekan Ekle</app-ui-button>
 </div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger list-alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <div class="state-message">Mekanlar yükleniyor...</div>
+} @else if (venues().length === 0 && !errorMessage()) {
+  <div class="state-message">
+    Henüz hiç mekan yok. <a routerLink="/admin/venues/create">İlk mekanı ekleyin.</a>
+  </div>
+} @else {
+  <div class="card-list">
+    <!-- track: Angular her kartı id ile takip eder; liste değişince sadece değişen kartı yeniden çizer -->
+    @for (venue of venues(); track venue.id) {
+      <article class="list-card">
+        <h3 class="list-card-title">{{ venue.name }}</h3>
+        <p class="list-card-meta">{{ venue.address }}</p>
+        <div class="list-card-footer">
+          <span class="badge">ID: {{ venue.id }}</span>
+          <button class="link-danger" (click)="deleteVenue(venue)" [disabled]="deletingId() === venue.id">
+            {{ deletingId() === venue.id ? 'Siliniyor...' : 'Sil' }}
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+}

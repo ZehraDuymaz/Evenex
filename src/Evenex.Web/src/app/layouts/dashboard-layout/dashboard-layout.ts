@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -10,6 +11,9 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './dashboard-layout.scss'
 })
 export class DashboardLayout {
+  // Sağ üstte giriş yapan kullanıcının e-postasını göstermek ve çıkış yapmak için
+  readonly auth = inject(AuthService);
+
   isSidebarCollapsed = signal(false);
   isDarkMode = signal(false);
 
@@ -24,5 +28,9 @@ export class DashboardLayout {
     } else {
       document.documentElement.classList.remove('dark');
     }
+  }
+
+  logout() {
+    this.auth.logout();
   }
 }

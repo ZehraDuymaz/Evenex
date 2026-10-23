@@ -70,3 +70,27 @@
 .font-mono {
   font-family: monospace;
 }
+
+/* Hatalı alan: kırmızı çerçeve */
+.input-field.invalid {
+  border-color: var(--color-danger);
+}
+
+.input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-error,
+.input-hint {
+  font-size: 0.8rem;
+}
+
+.input-error {
+  color: var(--color-danger);
+}
+
+.input-hint {
+  color: var(--color-text-muted);
+  font-style: italic;
+}

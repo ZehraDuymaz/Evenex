@@ -11,6 +11,9 @@
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
   --color-border-focus: #cbd5e1;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-info-bg: #eff6ff;
 }
 
 :root.dark {
@@ -25,6 +28,9 @@
   --color-text-muted: #94a3b8;
   --color-border: #1e293b;
   --color-border-focus: #334155;
+  --color-danger: #f87171;
+  --color-danger-bg: #2a0a0a;
+  --color-info-bg: #0b1a33;
 }
 
 /* Reset and Base Styles */
@@ -65,4 +71,116 @@ h5,
 h6 {
   margin: 0;
   font-weight: 700;
+}
+
+/* ---------- Ortak sayfa bileşenleri (liste ve form sayfalarında tekrar kullanılıyor) ---------- */
+
+/* Sayfa başlığı: solda başlık + açıklama, sağda buton */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.page-subtitle {
+  color: var(--color-text-muted);
+}
+
+/* Uyarı kutuları: API hatası (danger) veya bilgilendirme (info) */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.alert-danger {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.alert-info {
+  background: var(--color-info-bg);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+/* Yükleniyor / boş liste mesajı */
+.state-message {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.state-message a {
+  color: var(--color-primary);
+}
+
+/* Kart listesi (mekanlar, etkinlikler) */
+.card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.list-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.list-card-meta {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.list-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-surface-hover);
+  color: var(--color-text-muted);
+}
+
+.link-danger {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.link-danger:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }

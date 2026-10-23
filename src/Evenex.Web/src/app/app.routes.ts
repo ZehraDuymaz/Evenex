@@ -11,6 +11,7 @@ import { Settings } from './features/organizer/settings/settings';
 import { CreateVenue } from './features/organizer/create-venue/create-venue';
 import { CreateEvent } from './features/organizer/create-event/create-event';
 import { Home } from './features/attendee/home/home';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: Home, pathMatch: 'full' },
@@ -26,6 +27,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: DashboardLayout,
+    // Yönetim paneline sadece giriş yapmış kullanıcılar girebilir (alt sayfalar da dahil)
+    canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardHome },
       { path: 'venues', component: Venues },
