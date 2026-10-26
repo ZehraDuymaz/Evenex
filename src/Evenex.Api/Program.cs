@@ -9,7 +9,7 @@ using HashidsNet;
 using Evenex.Application.Events;
 using Evenex.Application.Venues;
 using Evenex.Application.VenueSections;
-using Evenex.Application.Abstraction;
+using Evenex.Application.Abstractions;
 using Evenex.Application.Mappings;
 using Evenex.Api.Middleware;
 
@@ -46,6 +46,7 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<IEventSectionRepository, EventSectionRepository>();
+builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

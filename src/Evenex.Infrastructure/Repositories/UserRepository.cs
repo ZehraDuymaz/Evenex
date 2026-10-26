@@ -1,16 +1,18 @@
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
-using Evenex.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Evenex.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+/// <summary>
+/// Kullanıcı sorguları. Ortak CRUD Repository&lt;User&gt;'den gelir.
+/// </summary>
+public class UserRepository : Repository<User>, IUserRepository
 {
-    private readonly AppDbContext _db;
-    public UserRepository(AppDbContext db) => _db = db;
+    public UserRepository(AppDbContext db) : base(db) { }
 
-    public Task<User?> GetEmailAsync(string email) => _db.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-    public async Task AddAsync(User user) => await _db.Users.AddAsync(user);
+    // Silinmiş kullanıcı giriş yapamasın / aynı email ile tekrar kayıt engellenmesin diye
+    // IsDeleted olanları da eliyoruz.
+    public Task<User?> GetByEmailAsync(string email)
+        => _set.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
 }

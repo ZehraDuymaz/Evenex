@@ -36,7 +36,7 @@ public class EventService
         int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
 
         // Mekân gerçekten var mı? Kontrol etmezsek SaveChanges'ta foreign key hatası (500) alırız.
-        _ = await _venueRepo.GetVenueAsync(realVenueId)
+        _ = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
 
         // Title, Description, EventDate AutoMapper ile doluyor; geri kalanları biz set ediyoruz.
@@ -58,7 +58,7 @@ public class EventService
     public async Task<EventResponseDto> GetEventByIdAsync (string id)
     {
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var foundEvent = await _eventRepo.GetEventAsync(realEventId)
+        var foundEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
         return _mapper.Map<EventResponseDto>(foundEvent);
@@ -66,7 +66,7 @@ public class EventService
 
     public async Task<IEnumerable<EventResponseDto>> GetEventsAsync ()
     {
-        var rawEvents = await _eventRepo.GetAllEventsAsync();
+        var rawEvents = await _eventRepo.GetAllAsync();
         return _mapper.Map<List<EventResponseDto>>(rawEvents);
     }
 
@@ -76,7 +76,7 @@ public class EventService
             throw new ArgumentException("Etkinlik tarihi geçmiş bir tarihe alınamaz.");
 
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var existingEvent = await _eventRepo.GetEventAsync(realEventId)
+        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
         // Map(kaynak, hedef): yeni nesne oluşturmaz, var olan entity'nin alanlarını DTO'dakilerle günceller
@@ -94,10 +94,10 @@ public class EventService
     public async Task DeleteAsync (string id)
     {
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var existingEvent = await _eventRepo.GetEventAsync(realEventId)
+        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
-        await _eventRepo.SoftDeleteAsync(existingEvent.Id);
+        await _eventRepo.SoftDeleteAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();
     }
 }

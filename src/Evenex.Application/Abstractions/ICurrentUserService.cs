@@ -1,5 +1,5 @@
 
-namespace Evenex.Application.Abstraction;
+namespace Evenex.Application.Abstractions;
 /// <summary>
 /// İsteği yapan (giriş yapmış) kullanıcının bilgilerini JWT token'ından okur.
 /// Interface Application'da, implementasyonu Infrastructure'da: Application katmanı HttpContext'i bilmek zorunda kalmaz.

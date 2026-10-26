@@ -4,25 +4,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Evenex.Infrastructure.Repositories;
 
-public class SectionRepository : ISectionRepository
+/// <summary>
+/// Mekân bölümü sorguları. Ortak CRUD Repository&lt;Section&gt;'den gelir; burada sadece özel sorgular var.
+/// </summary>
+public class SectionRepository : Repository<Section>, ISectionRepository
 {
-    private readonly AppDbContext _db;
+    public SectionRepository (AppDbContext db) : base(db) { }
 
-    public SectionRepository (AppDbContext db) => _db = db;
-
-    public async Task<Section?> GetSectionAsync (int id)
-    {
-        return await _db.Sections.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
-    }
-
-    // Bir mekâna ait, silinmemiş tüm bölümler
+    // Bir mekâna ait, silinmemiş tüm bölümler.
+    // _set = üst sınıftan gelen Sections tablosu (protected olduğu için burada erişebiliyoruz)
     public async Task<IEnumerable<Section>> GetSectionsByVenueIdAsync (int venueId)
     {
-        return await _db.Sections.Where(s => s.VenueId == venueId && !s.IsDeleted).ToListAsync();
-    }
-
-    public async Task AddAsync (Section section)
-    {
-        await _db.Sections.AddAsync(section);
+        return await _set.Where(s => s.VenueId == venueId && !s.IsDeleted).ToListAsync();
     }
 }

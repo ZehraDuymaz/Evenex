@@ -1,4 +1,4 @@
-using Evenex.Application.Abstraction;
+using Evenex.Application.Abstractions;
 using Evenex.Application.Venues;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

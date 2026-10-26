@@ -1,44 +1,14 @@
-using System.Runtime.CompilerServices;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Evenex.Infrastructure.Repositories;
 
 /// <summary>
-/// Mekân sorguları. Not: AppDbContext'teki global query filter sayesinde silinmiş
-/// mekânlar buradaki hiçbir sorguda gelmez.
+/// Mekân sorguları. Tüm CRUD kodu Repository&lt;Venue&gt;'den miras gelir.
+/// Not: AppDbContext'teki global query filter sayesinde silinmiş mekânlar hiçbir sorguda gelmez.
 /// </summary>
-public class VenueRepository : IVenueRepository
+public class VenueRepository : Repository<Venue>, IVenueRepository
 {
-    private readonly AppDbContext _db;
-    public VenueRepository (AppDbContext db) => _db = db;
-    public async Task<Venue?> GetVenueAsync(int id)
-    {
-        return await _db.Venues.FirstOrDefaultAsync(e => e.Id == id);
-    } 
-    public async Task<IEnumerable<Venue>> GetAllAsync ()
-    {
-        return await _db.Venues.Where(v => !v.IsDeleted).ToListAsync();
-    }
-    public Task<Venue?> GetByIdAsync (int id) => _db.Venues.FirstOrDefaultAsync(v => v.Id == id);
-    public async Task AddAsync (Venue venue)
-    {
-        await _db.Venues.AddAsync(venue);
-    }
-    // Update sadece EF'ye "bu nesne değişti" der; asıl SQL UPDATE, UnitOfWork.SaveChangesAsync'te çalışır
-    public Task UpdateAsync (Venue venue)
-    {
-        _db.Venues.Update(venue);
-        return Task.CompletedTask;
-    }
-    public async Task SoftDeleteAsync (int id)
-    {
-        var venue = await _db.Venues.FirstOrDefaultAsync(v => v.Id == id);
-        if (venue is null) return;
-
-        venue.IsDeleted = true;
-        venue.ModifiedDate = DateTime.UtcNow;
-        _db.Venues.Update(venue);
-    }
+    // base(db): gelen AppDbContext'i üst sınıfın (Repository<Venue>) constructor'ına iletir
+    public VenueRepository(AppDbContext db) : base(db) { }
 }
