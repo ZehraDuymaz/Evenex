@@ -30,7 +30,7 @@ public class AuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var existing = await _userRepo.GetEmailAsync(request.Email);
+        var existing = await _userRepo.GetByEmailAsync(request.Email);
         
         // email kayıtlıysa hata ver
         if (existing is not null)
@@ -67,7 +67,7 @@ public class AuthService
         // Farklı mesaj verirsek saldırgan hangi email'lerin sistemde kayıtlı olduğunu öğrenebilir.
         const string invalidCredentials = "Email veya şifre hatalı.";
 
-        var user = await _userRepo.GetEmailAsync(request.Email) ?? throw new UnauthorizedAccessException(invalidCredentials);
+        var user = await _userRepo.GetByEmailAsync(request.Email) ?? throw new UnauthorizedAccessException(invalidCredentials);
         
         // Şifreyi asla düz metin karşılaştırmıyoruz; BCrypt girilen şifreyi hash'leyip kayıtlı hash ile kıyaslar
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))

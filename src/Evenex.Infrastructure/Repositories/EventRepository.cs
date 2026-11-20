@@ -1,41 +1,13 @@
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Evenex.Infrastructure.Repositories;
 
-public class EventRepository : IEventRepository
+/// <summary>
+/// Etkinlik sorguları. Tüm CRUD kodu Repository&lt;Event&gt;'den miras gelir;
+/// silinmiş etkinlikler orada "yok" sayılır, id ile de getirilemez.
+/// </summary>
+public class EventRepository : Repository<Event>, IEventRepository
 {
-    private readonly AppDbContext _db; 
-
-    public EventRepository (AppDbContext db) => _db = db;
-
-    public async Task<Event?> GetEventAsync(int id)
-    {
-        // Soft delete edilmiş etkinlikler "yok" sayılır, id ile de getirilemez.
-        return await _db.Events.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
-    }
-    public async Task<IEnumerable<Event>> GetAllEventsAsync ()
-    {
-        return await _db.Events.Where(e => !e.IsDeleted).ToListAsync();
-    }
-
-    public async Task AddAsync (Event newEvent)
-    {
-        await _db.Events.AddAsync(newEvent);
-    }
-    public Task UpdateAsync (Event newEvent)
-    {
-        _db.Events.Update(newEvent);
-        return Task.CompletedTask;
-    }
-    public async Task SoftDeleteAsync (int id)
-    {
-        var newEvent = await _db.Events.FirstOrDefaultAsync(v => v.Id == id);
-        if (newEvent is null) return;
-
-        newEvent.IsDeleted = true;
-        newEvent.ModifiedDate = DateTime.UtcNow;
-        _db.Events.Update(newEvent);
-    }
+    public EventRepository(AppDbContext db) : base(db) { }
 }

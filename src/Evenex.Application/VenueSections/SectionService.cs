@@ -38,7 +38,7 @@ public class SectionService
         int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
 
         // Bölüm eklenecek mekân gerçekten var mı (ve silinmemiş mi)?
-        _ = await _venueRepo.GetVenueAsync(realVenueId)
+        _ = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
 
         var newSection = _mapper.Map<Section>(dto);

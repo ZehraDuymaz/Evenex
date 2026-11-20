@@ -3,48 +3,46 @@ using Evenex.Application.Events;
 using Evenex.Application.EventSections;
 using Evenex.Application.Venues;
 using Evenex.Application.VenueSections;
+using Evenex.Common.Hashing;
 using Evenex.Domain.Entities;
-using HashidsNet;
 
 namespace Evenex.Application.Mappings;
 
 /// <summary>
 /// Entity ↔ DTO dönüşüm kuralları tek bir yerde.
 /// İsimleri aynı olan alanları (Name, Title, ...) AutoMapper kendisi eşler,
-/// burada sadece "özel" olanları (id hash'leme, elle set edilecek alanlar) yazıyoruz.
+/// burada sadece "özel" olanları (foreign key hash'leme, elle set edilecek alanlar) yazıyoruz.
 ///
-/// Neden ForMember değil de ForCtorParam?
-/// Response DTO'larımız positional record: (string Id, string Name, ...). Bunlar sadece
-/// constructor ile oluşturulabiliyor, o yüzden AutoMapper değerleri constructor parametrelerine veriyor.
-/// ForMember property'yi ayarlar ve constructor'a etki etmez; Id "7" gibi düz yazıya dönüşür.
-/// ForCtorParam ise doğrudan constructor parametresini ayarlar.
-///
-/// IHashids constructor'dan geliyor; Program.cs'te profil DI container'dan alınan IHashids ile oluşturuluyor.
+/// DTO'ların KENDİ id'leri artık burada hash'lenmiyor: entity.Id (int) -> dto.Id (int) isim aynı olduğu için
+/// kendiliğinden kopyalanıyor, hash'leme ise BaseDto'nun init bloğunda otomatik oluyor.
+/// Eskiden her map'te ForCtorParam(Id, Encode) satırı vardı; hepsi gitti.
 /// </summary>
 public class MappingProfile : Profile
 {
-    public MappingProfile(IHashids hashids)
+    public MappingProfile()
     {
+        // HashedId'yi AutoMapper doldurmasın: Id set edilince BaseDto kendisi hesaplıyor.
+        // Global ignore = her map için tek tek .Ignore() yazmamak. Bu olmasa "HashedId map'lenmedi"
+        // diye konfigürasyon kontrolü (AssertConfigurationIsValid) patlardı.
+        AddGlobalIgnore("HashedId");
+
         // ---------- Entity -> Response DTO (veritabanından dışarıya) ----------
-        // Gerçek int id'ler asla dışarı çıkmaz, hepsi hashids.Encode ile string'e çevrilir.
+        // Kendi id'leri BaseDto'da hash'leniyor. Foreign key'ler (VenueId, EventId...) ise
+        // BaseDto'nun kapsamında değil, onları burada HashidsHelper ile hash'liyoruz.
 
         CreateMap<Venue, VenueResponseDto>()
-            .ForCtorParam(nameof(VenueResponseDto.Id), o => o.MapFrom(s => hashids.Encode(s.Id)))
             // TODO: Kapasite henüz hesaplanmıyor; Section/Seat'ler tamamlanınca buradan toplanacak.
-            .ForCtorParam(nameof(VenueResponseDto.Capacity), o => o.MapFrom(_ => 0));
+            .ForMember(d => d.Capacity, o => o.MapFrom(_ => 0));
 
         CreateMap<Event, EventResponseDto>()
-            .ForCtorParam(nameof(EventResponseDto.Id), o => o.MapFrom(s => hashids.Encode(s.Id)))
-            .ForCtorParam(nameof(EventResponseDto.VenueId), o => o.MapFrom(s => hashids.Encode(s.VenueId)));
+            .ForMember(d => d.VenueId, o => o.MapFrom(s => HashidsHelper.Encode(s.VenueId)));
 
         CreateMap<Section, SectionResponseDto>()
-            .ForCtorParam(nameof(SectionResponseDto.Id), o => o.MapFrom(s => hashids.Encode(s.Id)))
-            .ForCtorParam(nameof(SectionResponseDto.VenueId), o => o.MapFrom(s => hashids.Encode(s.VenueId)));
+            .ForMember(d => d.VenueId, o => o.MapFrom(s => HashidsHelper.Encode(s.VenueId)));
 
         CreateMap<EventSection, EventSectionResponseDto>()
-            .ForCtorParam(nameof(EventSectionResponseDto.Id), o => o.MapFrom(s => hashids.Encode(s.Id)))
-            .ForCtorParam(nameof(EventSectionResponseDto.EventId), o => o.MapFrom(s => hashids.Encode(s.EventId)))
-            .ForCtorParam(nameof(EventSectionResponseDto.SectionId), o => o.MapFrom(s => hashids.Encode(s.SectionId)));
+            .ForMember(d => d.EventId, o => o.MapFrom(s => HashidsHelper.Encode(s.EventId)))
+            .ForMember(d => d.SectionId, o => o.MapFrom(s => HashidsHelper.Encode(s.SectionId)));
 
         // ---------- Request DTO -> Entity (dışarıdan veritabanına) ----------
         // MemberList.Source: "DTO'daki her alan bir yere gitmeli" kontrolü yapılır.

@@ -33,7 +33,7 @@ public class VenueService
     public async Task<VenueResponseDto> GetByIdAsync (string id)
     {
         int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetVenueAsync(realVenueId)
+        var venue = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
 
         return _mapper.Map<VenueResponseDto>(venue);
@@ -57,7 +57,7 @@ public class VenueService
     public async Task<VenueResponseDto> UpdateAsync (string id, UpdateVenueDto dto, string updatedByMail, string updatedByIp)
     {
         int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetVenueAsync(realVenueId)
+        var venue = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
 
         // Var olan entity'nin Name/Address alanlarını DTO'dakilerle üzerine yazar
@@ -75,10 +75,10 @@ public class VenueService
     public async Task DeleteAsync (string id)
     {
         int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetVenueAsync(realVenueId)
+        var venue = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
 
-        await _venueRepo.SoftDeleteAsync(venue.Id);
+        await _venueRepo.SoftDeleteAsync(venue);
         await _unitOfWork.SaveChangesAsync();
     }
 }

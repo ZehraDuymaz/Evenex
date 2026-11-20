@@ -1,5 +1,5 @@
 using HashidsNet;
-using Evenex.Application.Abstraction;
+using Evenex.Application.Abstractions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 

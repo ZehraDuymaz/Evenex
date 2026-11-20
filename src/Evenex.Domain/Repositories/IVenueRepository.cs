@@ -5,12 +5,8 @@ namespace Evenex.Domain.Repositories;
 /// <summary>
 /// Mekân verisine erişim sözleşmesi (interface). Domain katmanı sadece "ne yapılacağını" bilir;
 /// "nasıl" yapılacağı (EF Core, SQL) Infrastructure katmanındaki implementasyondadır.
+/// Ortak CRUD metotları IRepository&lt;Venue&gt;'den gelir; mekâna özel bir sorgu gerekirse buraya eklenir.
 /// </summary>
-public interface IVenueRepository
+public interface IVenueRepository : IRepository<Venue>
 {
-    Task<Venue?> GetVenueAsync(int id);
-    Task<IEnumerable<Venue>> GetAllAsync();
-    Task AddAsync(Venue venue);
-    Task UpdateAsync(Venue venue);
-    Task SoftDeleteAsync(int id);
 }

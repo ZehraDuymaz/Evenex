@@ -11,4 +11,10 @@ public record CreateSectionDto (string VenueId, string Name, SectionType Type);
 
 public record UpdateSectionDto (string Name, SectionType Type);
 
-public record SectionResponseDto (string Id, string VenueId, string Name, SectionType Type) : BaseDto(Id);
+// Kendi id'si BaseDto'da, VenueId (foreign key) MappingProfile'da hash'lenir
+public record SectionResponseDto : BaseDto
+{
+    public string VenueId { get; init; } = default!;
+    public string Name { get; init; } = default!;
+    public SectionType Type { get; init; }
+}

@@ -9,9 +9,10 @@ using HashidsNet;
 using Evenex.Application.Events;
 using Evenex.Application.Venues;
 using Evenex.Application.VenueSections;
-using Evenex.Application.Abstraction;
+using Evenex.Application.Abstractions;
 using Evenex.Application.Mappings;
 using Evenex.Api.Middleware;
+using Evenex.Common.Hashing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,19 +25,21 @@ builder.Services.AddHttpContextAccessor();
 // Hashids: int id'leri dışarıya "wk1JaEWX" gibi tahmin edilemeyen string'ler olarak gösterir.
 // Salt değişirse daha önce verilmiş tüm id'ler geçersiz olur, o yüzden sabit kalmalı.
 // Singleton: uygulama boyunca tek bir nesne yeterli, durumu (state) yok.
-builder.Services.AddSingleton<IHashids>(new Hashids(
+var hashids = new Hashids(
     builder.Configuration["Hashids:Salt"] ?? throw new InvalidOperationException("Hashids:Salt ayarı eksik."),
-    minHashLength: 8));
+    minHashLength: 8);
+builder.Services.AddSingleton<IHashids>(hashids);
+// Aynı nesneyi statik yardımcıya da veriyoruz: BaseDto (DI'dan bir şey alamayan DTO'lar) id'leri bununla
+// hash'liyor. Tek nesne = servisler, JWT ve DTO'lar hep aynı salt ile aynı hash'i üretir.
+HashidsHelper.Configure(hashids);
 
-// AutoMapper: IMapper'ı DI'a kaydeder. MappingProfile id'leri hash'lemek için IHashids'e ihtiyaç duyduğu için
-// profili kendimiz, container'daki (yukarıda kaydettiğimiz) IHashids ile oluşturuyoruz.
-// v15'ten itibaren lisans anahtarı isteniyor; yoksa sadece log'a uyarı yazar, çalışmaya devam eder.
-builder.Services.AddAutoMapper((serviceProvider, cfg) =>
+// AutoMapper: IMapper'ı DI'a kaydeder ve MappingProfile'ı ekler
+builder.Services.AddAutoMapper(cfg =>
 {
     // Boş string verilirse "geçersiz anahtar" hatası loglanıyor, o yüzden sadece doluysa set ediyoruz
     var licenseKey = builder.Configuration["AutoMapper:LicenseKey"];
     if (!string.IsNullOrWhiteSpace(licenseKey)) cfg.LicenseKey = licenseKey;
-    cfg.AddProfile(new MappingProfile(serviceProvider.GetRequiredService<IHashids>()));
+    cfg.AddProfile<MappingProfile>();
 }, Type.EmptyTypes); // Assembly taraması yapma, profili zaten elle ekledik
 
 // Scoped: her HTTP isteği için yeni bir nesne, istek bitince atılır (DbContext ile aynı ömür)
@@ -46,6 +49,7 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<IEventSectionRepository, EventSectionRepository>();
+builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
