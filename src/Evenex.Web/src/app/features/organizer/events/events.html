@@ -21,8 +21,9 @@
     @for (event of events(); track event.id) {
       <article class="list-card">
         <h3 class="list-card-title">{{ event.title }}</h3>
-        <!-- date pipe: ISO tarihi kullanıcının saat dilimine çevirip Türkçe biçimler, örn. "12 Ara 2026 20:00" -->
-        <p class="list-card-meta">{{ event.eventDate | date: 'd MMM y, HH:mm' }}</p>
+        <!-- date pipe: UTC ISO tarihi Türkiye saatine çevirip Türkçe biçimler, örn. "12 Ara 2026, 20:00".
+             Biçim ve saat dilimi burada yazılmıyor; app.config.ts'teki varsayılanlardan (core/date.config.ts) geliyor. -->
+        <p class="list-card-meta">{{ event.eventDate | date }}</p>
         <p class="list-card-meta">{{ venueName(event.venueId) }}</p>
         <p class="list-card-meta">{{ event.description }}</p>
         <div class="list-card-footer">

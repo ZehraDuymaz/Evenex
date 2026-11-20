@@ -9,6 +9,7 @@ import { EventService } from '../../../core/services/event.service';
 import { VenueService } from '../../../core/services/venue.service';
 import { VenueResponse } from '../../../core/models/api.models';
 import { getErrorMessage } from '../../../core/utils/api-error';
+import { toUtcIso } from '../../../core/date.config';
 
 @Component({
   selector: 'app-create-event',
@@ -68,13 +69,12 @@ export class CreateEvent implements OnInit {
 
     const { venueId, title, description, date, time } = this.eventForm.getRawValue();
 
-    // Tarih ("2026-12-12") ve saat ("20:00") ayrı alanlardan geliyor; birleştirip tek bir Date yapıyoruz.
-    // new Date("2026-12-12T20:00") kullanıcının KENDİ saat dilimine göre yorumlanır (Türkiye: UTC+3),
-    // toISOString() ise bunu UTC'ye çevirir: "2026-12-12T17:00:00.000Z". Backend de UTC ile karşılaştırıyor.
-    const eventDate = new Date(`${date}T${time}`);
+    // Tarih ("2026-12-12") ve saat ("20:00") ayrı alanlardan geliyor. toUtcIso bunları Türkiye saati
+    // olarak yorumlayıp UTC'ye çevirir: "2026-12-12T17:00:00.000Z" (bkz. core/date.config.ts).
+    const eventDateIso = toUtcIso(date, time);
 
     // Backend de kontrol ediyor ama boşuna istek atmamak için burada da bakıyoruz
-    if (eventDate.getTime() < Date.now()) {
+    if (new Date(eventDateIso).getTime() < Date.now()) {
       this.errorMessage.set('Sadece gelecek tarihler için etkinlik oluşturulabilir.');
       return;
     }
@@ -83,7 +83,7 @@ export class CreateEvent implements OnInit {
     this.errorMessage.set('');
 
     this.eventService
-      .create({ venueId, title, description, eventDate: eventDate.toISOString() })
+      .create({ venueId, title, description, eventDate: eventDateIso })
       .subscribe({
         next: () => this.router.navigate(['/admin/events']),
         error: (error) => {
