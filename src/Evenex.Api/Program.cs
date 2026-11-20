@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Evenex.Infrastructure;
 using Evenex.Application.Auth;
@@ -76,7 +77,11 @@ builder.Services.AddCors(options =>
 });
 
 // Controllers
-builder.Services.AddControllers();
+// JsonStringEnumConverter: enum'lar JSON'da sayı yerine İSİM olarak yazılır/okunur
+// ("status": "Published", 1 değil). Frontend'in "1 neydi?" diye ezber yapmasına gerek kalmaz.
+// Okurken hem "Published" hem eski usul sayı (1) kabul edilir.
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi(options =>
 {
     // Scalar arayüzünde "Authorize" alanı çıksın ve token girilerek korumalı endpoint'ler test edilebilsin diye

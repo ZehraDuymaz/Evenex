@@ -27,10 +27,20 @@
         <p class="list-card-meta">{{ venueName(event.venueId) }}</p>
         <p class="list-card-meta">{{ event.description }}</p>
         <div class="list-card-footer">
-          <span class="badge">{{ statusLabel(event.status) }}</span>
-          <button class="link-danger" (click)="deleteEvent(event)" [disabled]="deletingId() === event.id">
-            {{ deletingId() === event.id ? 'Siliniyor...' : 'Sil' }}
-          </button>
+          <!-- Durum rozetinin rengi duruma göre değişir: badge-Draft / badge-Published / badge-Cancelled -->
+          <span class="badge" [class]="'badge-' + event.status">{{ statusLabel(event.status) }}</span>
+          <div class="card-actions">
+            <!-- Sadece izin verilen eylemlerin butonu görünür (kurallar backend'deki Event.Publish/Cancel ile aynı) -->
+            @if (event.status === 'Draft') {
+              <button class="link-primary" (click)="publishEvent(event)" [disabled]="changingStatusId() === event.id">Yayınla</button>
+            }
+            @if (event.status !== 'Cancelled') {
+              <button class="link-danger" (click)="cancelEvent(event)" [disabled]="changingStatusId() === event.id">İptal et</button>
+            }
+            <button class="link-danger" (click)="deleteEvent(event)" [disabled]="deletingId() === event.id">
+              {{ deletingId() === event.id ? 'Siliniyor...' : 'Sil' }}
+            </button>
+          </div>
         </div>
       </article>
     }

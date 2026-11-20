@@ -39,7 +39,8 @@ public class VenueController : ControllerBase
         var created = await _venueService.CreateVenueAsync(dto, _currentUser.Email, ClientIp);
 
         // 201 Created + "Location: /api/venue/{id}" header'ı + oluşan kaydın kendisi
-        return CreatedAtAction(nameof(GetVenueById), new { id = created.Id }, created);
+        // Location header'ına hash'li id: created.Id gerçek int id'dir, dışarı sızmamalı
+        return CreatedAtAction(nameof(GetVenueById), new { id = created.HashedId }, created);
     }
 
     [Authorize]

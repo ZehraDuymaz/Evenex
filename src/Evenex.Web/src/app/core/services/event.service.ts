@@ -28,6 +28,16 @@ export class EventService {
     return this.http.put<EventResponse>(`${this.baseUrl}/${id}`, request);
   }
 
+  // Durum değiştirme: body yok (null), sadece hangi etkinlik olduğu (id) adreste.
+  // Kural ihlalinde (örn. iptal edilmiş etkinliği yayınlamak) backend 409 döner.
+  publish(id: string): Observable<EventResponse> {
+    return this.http.post<EventResponse>(`${this.baseUrl}/${id}/publish`, null);
+  }
+
+  cancel(id: string): Observable<EventResponse> {
+    return this.http.post<EventResponse>(`${this.baseUrl}/${id}/cancel`, null);
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

@@ -5,7 +5,7 @@ namespace Evenex.Application.VenueSections;
 
 /// <summary>
 /// Mekân bölümü (Section) oluşturma/güncelleme ve dışarıya gösterme bilgileri.
-/// Type: 0 = Seated (oturmalı), 1 = Standing (ayakta).
+/// Type: "Seated" (oturmalı) veya "Standing" (ayakta). JSON'da isim olarak gider/gelir (eski usul 0/1 de kabul edilir).
 /// </summary>
 public record CreateSectionDto (string VenueId, string Name, SectionType Type);
 

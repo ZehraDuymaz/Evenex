@@ -174,6 +174,33 @@ h6 {
   color: var(--color-text-muted);
 }
 
+/* Etkinlik durum rozetleri (events sayfası) */
+.badge-Published {
+  background: var(--color-info-bg);
+  color: var(--color-primary);
+}
+
+.badge-Cancelled {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.link-primary {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.link-primary:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 .link-danger {
   color: var(--color-danger);
   font-size: 0.85rem;

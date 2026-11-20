@@ -1,4 +1,6 @@
 using Evenex.Domain.Common;
+using Evenex.Domain.Enums;
+using Evenex.Domain.Exceptions;
 
 namespace Evenex.Domain.Entities;
 
@@ -18,9 +20,38 @@ public class Event : BaseEntity
     // required: nesne oluşturulurken bu alan verilmek zorunda, yoksa derleme hatası
     public required string Description { get; set; }
     public DateTime EventDate { get; set; }
-    // Draft (taslak) -> yayınlanınca değişecek. İleride enum'a çevrilebilir.
-    public string Status { get; set; } = "Draft";
+    // Yeni etkinlik her zaman taslak başlar.
+    // private set: durumu dışarıdan kimse "event.Status = ..." diye değiştiremez; sadece aşağıdaki
+    // Publish/Cancel metotları değiştirebilir. Böylece kurallar atlanamaz.
+    // (EF Core private set'e veritabanından okurken yazabiliyor, sorun değil.)
+    public EventStatus Status { get; private set; } = EventStatus.Draft;
 
     // Bu etkinlikte satışa açılan bölümler (fiyat + kontenjan bilgisiyle)
     public ICollection<EventSection> EventSections { get; set; } = new List<EventSection>();
+
+    // ---------- Durum geçişleri (iş kuralları entity'nin içinde) ----------
+    // Kurallar burada olunca hangi servis çağırırsa çağırsın aynı kurallar geçerli; tek bir yerde yazılı.
+
+    /// <summary>Taslağı yayına alır. Sadece Draft durumundan yapılabilir.</summary>
+    public void Publish()
+    {
+        if (Status != EventStatus.Draft)
+            throw new InvalidEventStatusException(Status, "yayınlama");
+
+        // Geçmiş tarihli bir etkinliği yayınlamanın anlamı yok
+        if (EventDate < DateTime.UtcNow)
+            throw new InvalidEventStatusException(Status, "geçmiş tarihli etkinliği yayınlama");
+
+        // TODO: EventSection'lar yazılınca: en az bir satış bölümü yoksa yayınlanamasın.
+        Status = EventStatus.Published;
+    }
+
+    /// <summary>Etkinliği iptal eder. Zaten iptal edilmişse tekrar iptal edilemez.</summary>
+    public void Cancel()
+    {
+        if (Status == EventStatus.Cancelled)
+            throw new InvalidEventStatusException(Status, "iptal");
+
+        Status = EventStatus.Cancelled;
+    }
 }

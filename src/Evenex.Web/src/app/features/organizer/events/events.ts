@@ -1,16 +1,19 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { UiButton } from '../../../shared/components/ui-button/ui-button';
 import { EventService } from '../../../core/services/event.service';
 import { VenueService } from '../../../core/services/venue.service';
-import { EventResponse, VenueResponse } from '../../../core/models/api.models';
+import { EventResponse, EventStatus, VenueResponse } from '../../../core/models/api.models';
 import { getErrorMessage } from '../../../core/utils/api-error';
 
-// Backend'deki durum kodlarının ekranda görünecek Türkçe karşılıkları
-const STATUS_LABELS: Record<string, string> = {
-  Draft: 'Taslak'
+// Backend'deki durum kodlarının ekranda görünecek Türkçe karşılıkları.
+// Record<EventStatus, string>: 3 durumun HEPSİ yazılmak zorunda; biri unutulursa TypeScript hata verir.
+const STATUS_LABELS: Record<EventStatus, string> = {
+  Draft: 'Taslak',
+  Published: 'Yayında',
+  Cancelled: 'İptal edildi'
 };
 
 @Component({
@@ -28,6 +31,8 @@ export class Events implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly deletingId = signal<string | null>(null);
+  // Yayınla / iptal et isteği süren etkinlik (butonu kilitlemek için)
+  readonly changingStatusId = signal<string | null>(null);
 
   // Etkinlik sadece venueId taşıyor ("wk1JaEWX"). Ekranda mekân adını göstermek için
   // id -> ad sözlüğü (Map) oluşturuyoruz; her etkinlik için listeyi tek tek aramaktan hızlı.
@@ -56,8 +61,34 @@ export class Events implements OnInit {
     return this.venueNames().get(venueId) ?? 'Bilinmeyen mekan';
   }
 
-  statusLabel(status: string): string {
-    return STATUS_LABELS[status] ?? status;
+  statusLabel(status: EventStatus): string {
+    return STATUS_LABELS[status];
+  }
+
+  publishEvent(event: EventResponse): void {
+    this.changeStatus(event, this.eventService.publish(event.id));
+  }
+
+  cancelEvent(event: EventResponse): void {
+    if (!confirm(`"${event.title}" etkinliğini iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
+    this.changeStatus(event, this.eventService.cancel(event.id));
+  }
+
+  // Yayınla ve iptal et aynı adımları izliyor: isteği gönder, gelen güncel etkinliği listede değiştir.
+  private changeStatus(event: EventResponse, request: Observable<EventResponse>): void {
+    this.changingStatusId.set(event.id);
+    this.errorMessage.set('');
+    request.subscribe({
+      next: (updated) => {
+        // Sadece değişen kartı yeni haliyle değiştiriyoruz; tüm listeyi yeniden yüklemeye gerek yok
+        this.events.update((list) => list.map((e) => (e.id === updated.id ? updated : e)));
+        this.changingStatusId.set(null);
+      },
+      error: (error) => {
+        this.errorMessage.set(getErrorMessage(error));
+        this.changingStatusId.set(null);
+      }
+    });
   }
 
   deleteEvent(event: EventResponse): void {

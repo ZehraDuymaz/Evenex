@@ -33,13 +33,17 @@ export interface CreateVenueRequest {
 export type UpdateVenueRequest = CreateVenueRequest;
 
 // ---------- Event (Etkinlik) ----------
+// Backend'deki EventStatus enum'ının karşılığı. Backend JSON'da isim gönderiyor ("Published").
+// Union type: status sadece bu 3 metinden biri olabilir; "Publishd" yazarsan TypeScript hata verir.
+export type EventStatus = 'Draft' | 'Published' | 'Cancelled';
+
 export interface EventResponse {
   id: string;
   venueId: string;
   title: string;
   description: string;
   eventDate: string; // ISO formatında tarih, örn. "2030-01-01T20:00:00Z"
-  status: string;    // şimdilik hep "Draft"
+  status: EventStatus;
 }
 
 export interface CreateEventRequest {
