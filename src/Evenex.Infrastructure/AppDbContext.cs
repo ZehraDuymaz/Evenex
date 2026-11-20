@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Evenex.Domain.Entities;
+using Evenex.Infrastructure.Converters;
 
 namespace Evenex.Infrastructure;
 
@@ -22,6 +23,16 @@ public class AppDbContext : DbContext
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Venue> Venues { get; set; }
+
+    // Konvansiyonlar: tek tek her property için değil, bir TÜR için toplu kural koyar.
+    // Burada "projedeki bütün DateTime ve DateTime? alanları UtcDateTimeConverter'dan geçsin" diyoruz;
+    // yeni bir tarih alanı eklendiğinde de otomatik geçerli olur, kimse unutamaz.
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        // Nullable alanlar (ModifiedDate, HeldUntil) için de aynı converter; null değerler converter'a hiç gelmez
+        configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

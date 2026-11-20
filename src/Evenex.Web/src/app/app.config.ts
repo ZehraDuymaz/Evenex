@@ -1,12 +1,13 @@
 import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { registerLocaleData } from '@angular/common';
+import { DATE_PIPE_DEFAULT_OPTIONS, registerLocaleData } from '@angular/common';
 import localeTr from '@angular/common/locales/tr';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { APP_DATE_FORMAT, APP_TIMEZONE } from './core/date.config';
 
 // Tarih/sayı formatları Türkçe olsun diye ("12 Ara 2026", "1.250,00")
 registerLocaleData(localeTr);
@@ -18,6 +19,9 @@ export const appConfig: ApplicationConfig = {
     // HttpClient'ı uygulamaya tanıtıyoruz. withFetch: SSR ile uyumlu olan fetch API'sini kullan.
     // withInterceptors: her istek authInterceptor'dan geçsin (token ekleme + 401 yakalama).
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-    { provide: LOCALE_ID, useValue: 'tr' }
+    { provide: LOCALE_ID, useValue: 'tr' },
+    // Tüm "| date" kullanımlarının varsayılanı: aynı biçim + Türkiye saati. Böylece hiçbir şablonda
+    // biçim/saat dilimi tekrar yazılmaz ve tarih her ekranda aynı görünür.
+    { provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: { dateFormat: APP_DATE_FORMAT, timezone: APP_TIMEZONE } }
   ]
 };
