@@ -50,6 +50,11 @@ public class AppDbContext : DbContext
         // "WHERE IsDeleted = 0" eklenir. Böylece silinmiş mekânları her seferinde elle filtrelemek gerekmez.
         modelBuilder.Entity<Venue>().HasQueryFilter(v => !v.IsDeleted);
 
+        // Etkinlik durumu veritabanına sayı (0,1,2) değil İSİM olarak ("Draft", "Published") yazılır:
+        // eski kayıtlarda zaten "Draft" metni var, onlar olduğu gibi çalışmaya devam eder; tablo da okunaklı olur.
+        // HasMaxLength(20): nvarchar(max) yerine kısa kolon (en uzun değer "Published" = 9 karakter).
+        modelBuilder.Entity<Event>().Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
+
         // Para alanları: toplam 18 basamak, virgülden sonra 2 basamak (örn. 1234567890123456.78).
         // Belirtilmezse EF uyarı veriyor ve büyük değerler sessizce kırpılabiliyor.
         modelBuilder.Entity<EventSection>().Property(es => es.BasePrice).HasPrecision(18, 2);

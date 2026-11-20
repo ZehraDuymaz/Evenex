@@ -35,13 +35,27 @@ public class EventController : ControllerBase
     public async Task<IActionResult> CreateNewEvent([FromBody] CreateEventDto dto)
     {
         var created = await _eventService.CreateEventAsync(dto, _currentUser.Email, ClientIp);
-        return CreatedAtAction(nameof(GetEventById), new { id = created.Id }, created);
+        // Location header'ına HASH'li id yazılmalı (created.Id gerçek int id'dir, dışarı sızmamalı ve
+        // /api/event/{id} adresi zaten hash bekliyor)
+        return CreatedAtAction(nameof(GetEventById), new { id = created.HashedId }, created);
     }
 
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEvent (string id, [FromBody] UpdateEventDto dto)
         => Ok(await _eventService.UpdateAsync(id, dto, _currentUser.Email, ClientIp));
+
+    // Durum değiştirme: "bu etkinliği yayınla / iptal et" bir eylem olduğu için POST + eylem adı.
+    // Kural ihlalinde (örn. iptal edilmiş etkinliği yayınlamak) 409 Conflict döner.
+    [Authorize]
+    [HttpPost("{id}/publish")]
+    public async Task<IActionResult> PublishEvent (string id)
+        => Ok(await _eventService.PublishAsync(id, _currentUser.Email, ClientIp));
+
+    [Authorize]
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelEvent (string id)
+        => Ok(await _eventService.CancelAsync(id, _currentUser.Email, ClientIp));
 
     [Authorize]
     [HttpDelete("{id}")]

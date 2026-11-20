@@ -5,6 +5,7 @@ using Evenex.Application.Mappings;
 using Evenex.Application.Venues;
 using Evenex.Common.Hashing;
 using Evenex.Domain.Entities;
+using Evenex.Domain.Enums;
 using HashidsNet;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,7 +65,7 @@ public class MappingProfileTests
         Assert.Equal(_hashids.Encode(7), dto.HashedId);
         Assert.Equal(_hashids.Encode(42), dto.VenueId);   // foreign key MappingProfile'da hash'lendi
         Assert.Equal("Konser", dto.Title);
-        Assert.Equal("Draft", dto.Status);
+        Assert.Equal(EventStatus.Draft, dto.Status);
     }
 
     [Fact]

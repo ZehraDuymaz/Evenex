@@ -1,6 +1,8 @@
 using AutoMapper;
 using Evenex.Application.Common;
 using Evenex.Domain.Entities;
+using Evenex.Domain.Enums;
+using Evenex.Domain.Exceptions;
 using Evenex.Domain.Repositories;
 using HashidsNet;
 
@@ -42,7 +44,7 @@ public class EventService
         // Title, Description, EventDate AutoMapper ile doluyor; geri kalanları biz set ediyoruz.
         var newEvent = _mapper.Map<Event>(dto);
         newEvent.VenueId = realVenueId;
-        newEvent.Status = "Draft"; // Yeni etkinlik taslak olarak başlar, yayınlama sonra eklenecek
+        // Status burada set edilmiyor: Event entity'si her zaman Draft başlıyor (bkz. Event.Status)
         newEvent.CreatedUser = userEmail;
         newEvent.CreatedDate = DateTime.UtcNow;
         newEvent.CreatedIP = userIp;
@@ -79,6 +81,10 @@ public class EventService
         var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
+        // İptal edilmiş etkinlik artık düzenlenemez (409 Conflict)
+        if (existingEvent.Status == EventStatus.Cancelled)
+            throw new InvalidEventStatusException(existingEvent.Status, "güncelleme");
+
         // Map(kaynak, hedef): yeni nesne oluşturmaz, var olan entity'nin alanlarını DTO'dakilerle günceller
         _mapper.Map(dto, existingEvent);
         existingEvent.ModifiedUser = updatedByMail;
@@ -99,5 +105,34 @@ public class EventService
 
         await _eventRepo.SoftDeleteAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();
+    }
+
+    // ---------- Durum değiştirme (yayınla / iptal et) ----------
+    // Kuralların kendisi Event entity'sinde (Publish/Cancel). Servisin işi sadece: id'yi çöz, kaydı getir,
+    // entity'ye "yayınla" de, kim/ne zaman bilgisini yaz, kaydet. Kural ihlalinde entity 409'a dönen hata fırlatır.
+
+    public Task<EventResponseDto> PublishAsync(string id, string userEmail, string userIp)
+        => ChangeStatusAsync(id, e => e.Publish(), userEmail, userIp);
+
+    public Task<EventResponseDto> CancelAsync(string id, string userEmail, string userIp)
+        => ChangeStatusAsync(id, e => e.Cancel(), userEmail, userIp);
+
+    // Yayınla ve iptal et aynı adımlardan geçiyor; sadece ortadaki işlem farklı.
+    // Action<Event> = "bir Event alan ve bir şey yapan fonksiyon" (örn. e => e.Publish()).
+    private async Task<EventResponseDto> ChangeStatusAsync(string id, Action<Event> transition, string userEmail, string userIp)
+    {
+        int realEventId = _hashids.DecodeId(id, "Etkinlik");
+        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
+            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
+
+        transition(existingEvent);
+        existingEvent.ModifiedUser = userEmail;
+        existingEvent.ModifiedDate = DateTime.UtcNow;
+        existingEvent.ModifiedIP = userIp;
+
+        await _eventRepo.UpdateAsync(existingEvent);
+        await _unitOfWork.SaveChangesAsync();
+
+        return _mapper.Map<EventResponseDto>(existingEvent);
     }
 }

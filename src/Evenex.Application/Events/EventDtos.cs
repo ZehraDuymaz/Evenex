@@ -1,4 +1,5 @@
 using Evenex.Common.Dtos;
+using Evenex.Domain.Enums;
 
 namespace Evenex.Application.Events;
 
@@ -19,5 +20,6 @@ public record EventResponseDto : BaseDto
     public string Title { get; init; } = default!;
     public string Description { get; init; } = default!;
     public DateTime EventDate { get; init; }
-    public string Status { get; init; } = default!;
+    // Enum; JSON'da sayı değil isim olarak görünür ("Published"), bkz. Program.cs JsonStringEnumConverter
+    public EventStatus Status { get; init; }
 }
