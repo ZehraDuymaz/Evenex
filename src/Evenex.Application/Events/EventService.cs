@@ -60,7 +60,7 @@ public class EventService
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
         var foundEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
-
+            
         return _mapper.Map<EventResponseDto>(foundEvent);
     }
 

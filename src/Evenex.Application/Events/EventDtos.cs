@@ -10,4 +10,14 @@ namespace Evenex.Application.Events;
 
 public record CreateEventDto (string VenueId, string Title, string Description, DateTime EventDate);
 public record UpdateEventDto (string Title, string Description, DateTime EventDate);
-public record EventResponseDto (string Id, string VenueId, string Title, string Description, DateTime EventDate, string Status) : BaseDto(Id);
+
+// Etkinliğin kendi id'si BaseDto'da otomatik hash'lenir.
+// VenueId bir foreign key; BaseDto sadece DTO'nun KENDİ id'sini kapsadığı için onu MappingProfile hash'liyor.
+public record EventResponseDto : BaseDto
+{
+    public string VenueId { get; init; } = default!;
+    public string Title { get; init; } = default!;
+    public string Description { get; init; } = default!;
+    public DateTime EventDate { get; init; }
+    public string Status { get; init; } = default!;
+}

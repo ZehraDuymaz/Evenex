@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Evenex.Infrastructure.Repositories;
 
 /// <summary>
-/// IRepository&lt;T&gt;'nin EF Core ile yazılmış ortak implementasyonu. Eskiden her repository
+/// <see cref="IRepository{T}"/>'nin EF Core ile yazılmış ortak implementasyonu. Eskiden her repository
 /// (Venue, Event, Section...) aynı Add/Update/SoftDelete kodunu kopyalıyordu; şimdi bir kere burada.
 ///
-/// abstract: tek başına "new Repository&lt;Venue&gt;()" yapılamaz, sadece miras alınır
-///   (çıplak bir şasi gibi; gerçek repository'ler bunun üstüne kurulur).
+/// abstract: tek başına new ile oluşturulamaz, sadece miras alınır
+///   (gerçek repository'ler bunun üstüne kurulur).
 /// public: VenueRepository public olmak zorunda (Program.cs başka projede, Evenex.Api'de kaydediyor)
 ///   ve public bir sınıf internal bir sınıftan miras alamaz (CS0060 hatası).
 /// </summary>
