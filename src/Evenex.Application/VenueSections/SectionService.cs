@@ -1,8 +1,6 @@
 using AutoMapper;
-using Evenex.Application.Common;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
-using HashidsNet;
 
 namespace Evenex.Application.VenueSections;
 
@@ -14,35 +12,32 @@ public class SectionService
     private readonly ISectionRepository _sectionRepo;
     private readonly IVenueRepository _venueRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHashids _hashids;
     private readonly IMapper _mapper;
 
-    public SectionService (IUnitOfWork unitOfWork, ISectionRepository sectionRepo, IVenueRepository venueRepo, IHashids hashids, IMapper mapper)
+    public SectionService (IUnitOfWork unitOfWork, ISectionRepository sectionRepo, IVenueRepository venueRepo, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _sectionRepo = sectionRepo;
         _venueRepo = venueRepo;
-        _hashids = hashids;
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<SectionResponseDto>> GetSectionsByVenueAsync (string venueId)
+    // venueId gerçek int: URL'deki hash'i controller'daki [HashId] çözdü
+    public async Task<IEnumerable<SectionResponseDto>> GetSectionsByVenueAsync (int venueId)
     {
-        int realVenueId = _hashids.DecodeId(venueId, "Mekan");
-        var sections = await _sectionRepo.GetSectionsByVenueIdAsync(realVenueId);
+        var sections = await _sectionRepo.GetSectionsByVenueIdAsync(venueId);
         return _mapper.Map<List<SectionResponseDto>>(sections);
     }
 
     public async Task<SectionResponseDto> CreateVenueSectionAsync (CreateSectionDto dto)
     {
-        int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
-
+        // dto.VenueId gerçek int (JSON'dan gelirken [HashId] çözdü).
         // Bölüm eklenecek mekân gerçekten var mı (ve silinmemiş mi)?
-        _ = await _venueRepo.GetByIdAsync(realVenueId)
-            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
+        _ = await _venueRepo.GetByIdAsync(dto.VenueId)
+            ?? throw new KeyNotFoundException("Mekan bulunamadı.");
 
+        // Name, Type ve VenueId AutoMapper ile doluyor
         var newSection = _mapper.Map<Section>(dto);
-        newSection.VenueId = realVenueId;
 
         await _sectionRepo.AddAsync(newSection);
         await _unitOfWork.SaveChangesAsync();

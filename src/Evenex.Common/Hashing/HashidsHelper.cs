@@ -33,4 +33,13 @@ public static class HashidsHelper
             throw new FormatException($"Geçersiz id: {hashedId}");
         return decoded[0];
     }
+
+    // Hata fırlatmadan dener: çözebilirse true + id, çözemezse false.
+    // Model binder ve JSON converter kendi hata türlerini (404 / 400) seçebilsin diye var.
+    public static bool TryDecode(string hashedId, out int id)
+    {
+        var decoded = Instance.Decode(hashedId);
+        id = decoded.Length > 0 ? decoded[0] : 0;
+        return decoded.Length > 0;
+    }
 }

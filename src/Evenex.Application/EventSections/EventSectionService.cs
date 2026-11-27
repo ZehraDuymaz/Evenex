@@ -1,9 +1,7 @@
 using AutoMapper;
-using Evenex.Application.Common;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Exceptions;
 using Evenex.Domain.Repositories;
-using HashidsNet;
 
 namespace Evenex.Application.EventSections;
 
@@ -23,29 +21,27 @@ public class EventSectionService
     private readonly IEventRepository _eventRepo;
     private readonly ISectionRepository _sectionRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHashids _hashids;
     private readonly IMapper _mapper;
 
     public EventSectionService(IEventSectionRepository eventSectionRepo, IEventRepository eventRepo, ISectionRepository sectionRepo,
-        IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
+        IUnitOfWork unitOfWork, IMapper mapper)
     {
         _eventSectionRepo = eventSectionRepo;
         _eventRepo = eventRepo;
         _sectionRepo = sectionRepo;
         _unitOfWork = unitOfWork;
-        _hashids = hashids;
         _mapper = mapper;
     }
 
     // Bir etkinliğin satış bölümleri (örn. etkinlik sayfasında "A Blok 500 TL" listesi)
-    public async Task<IEnumerable<EventSectionResponseDto>> GetByEventAsync(string eventId)
+    public async Task<IEnumerable<EventSectionResponseDto>> GetByEventAsync(int eventId)
     {
         var existingEvent = await GetEventAsync(eventId);
         var eventSections = await _eventSectionRepo.GetByEventIdAsync(existingEvent.Id);
         return _mapper.Map<List<EventSectionResponseDto>>(eventSections);
     }
 
-    public async Task<EventSectionResponseDto> GetByIdAsync(string id)
+    public async Task<EventSectionResponseDto> GetByIdAsync(int id)
         => _mapper.Map<EventSectionResponseDto>(await GetEventSectionAsync(id));
 
     public async Task<EventSectionResponseDto> CreateAsync(CreateEventSectionDto dto)
@@ -54,9 +50,9 @@ public class EventSectionService
         // Yayındaki veya iptal edilmiş etkinliğe bölüm eklenemez (409)
         existingEvent.EnsureSectionsEditable();
 
-        int realSectionId = _hashids.DecodeId(dto.SectionId, "Bölüm");
-        var section = await _sectionRepo.GetByIdAsync(realSectionId)
-            ?? throw new KeyNotFoundException($"Bölüm bulunamadı: {dto.SectionId}");
+        // dto.SectionId / dto.EventId gerçek int (JSON'dan gelirken [HashId] çözdü)
+        var section = await _sectionRepo.GetByIdAsync(dto.SectionId)
+            ?? throw new KeyNotFoundException("Bölüm bulunamadı.");
 
         // Bölüm, etkinliğin yapıldığı mekâna ait olmalı: Zorlu'nun A Blok'u başka mekândaki etkinlikte satılamaz
         if (section.VenueId != existingEvent.VenueId)
@@ -76,7 +72,7 @@ public class EventSectionService
         return _mapper.Map<EventSectionResponseDto>(eventSection);
     }
 
-    public async Task<EventSectionResponseDto> UpdateAsync(string id, UpdateEventSectionDto dto)
+    public async Task<EventSectionResponseDto> UpdateAsync(int id, UpdateEventSectionDto dto)
     {
         var eventSection = await GetEventSectionAsync(id);
         var parentEvent = await LoadParentEventAsync(eventSection);
@@ -90,7 +86,7 @@ public class EventSectionService
         return _mapper.Map<EventSectionResponseDto>(eventSection);
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(int id)
     {
         var eventSection = await GetEventSectionAsync(id);
         var parentEvent = await LoadParentEventAsync(eventSection);
@@ -100,21 +96,14 @@ public class EventSectionService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    // ---------- Yardımcılar: "id'yi çöz, kaydı getir, yoksa 404" tekrarını tek yere topluyor ----------
+    // ---------- Yardımcılar: "kaydı getir, yoksa 404" tekrarını tek yere topluyor ----------
+    // id'ler gerçek int (hash'i model binder / JSON converter çözdü). Mesajlarda id yazmıyoruz ki sızmasın.
 
-    private async Task<Event> GetEventAsync(string hashedEventId)
-    {
-        int realEventId = _hashids.DecodeId(hashedEventId, "Etkinlik");
-        return await _eventRepo.GetByIdAsync(realEventId)
-            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {hashedEventId}");
-    }
+    private async Task<Event> GetEventAsync(int eventId)
+        => await _eventRepo.GetByIdAsync(eventId) ?? throw new KeyNotFoundException("Etkinlik bulunamadı.");
 
-    private async Task<EventSection> GetEventSectionAsync(string hashedId)
-    {
-        int realId = _hashids.DecodeId(hashedId, "Etkinlik bölümü");
-        return await _eventSectionRepo.GetByIdAsync(realId)
-            ?? throw new KeyNotFoundException($"Etkinlik bölümü bulunamadı: {hashedId}");
-    }
+    private async Task<EventSection> GetEventSectionAsync(int id)
+        => await _eventSectionRepo.GetByIdAsync(id) ?? throw new KeyNotFoundException("Etkinlik bölümü bulunamadı.");
 
     // Bölümün bağlı olduğu etkinlik (silinmişse bölüm de artık düzenlenemez)
     private async Task<Event> LoadParentEventAsync(EventSection eventSection)

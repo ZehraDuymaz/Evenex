@@ -1,10 +1,8 @@
 using AutoMapper;
-using Evenex.Application.Common;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Enums;
 using Evenex.Domain.Exceptions;
 using Evenex.Domain.Repositories;
-using HashidsNet;
 
 namespace Evenex.Application.Events;
 
@@ -18,16 +16,14 @@ public class EventService
     private readonly IVenueRepository _venueRepo;
     private readonly IEventSectionRepository _eventSectionRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHashids _hashids;
     private readonly IMapper _mapper;
 
-    public EventService (IEventRepository eventRepo, IVenueRepository venueRepo, IEventSectionRepository eventSectionRepo, IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
+    public EventService (IEventRepository eventRepo, IVenueRepository venueRepo, IEventSectionRepository eventSectionRepo, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _eventRepo = eventRepo;
         _venueRepo = venueRepo;
         _eventSectionRepo = eventSectionRepo;
         _unitOfWork = unitOfWork;
-        _hashids = hashids;
         _mapper = mapper;
     }
 
@@ -37,16 +33,14 @@ public class EventService
         if (dto.EventDate < DateTime.UtcNow)
             throw new ArgumentException("Sadece gelecek tarihler için etkinlik oluşturulabilir.");
 
-        int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
-
+        // dto.VenueId gerçek int (JSON'dan gelirken [HashId] çözdü).
         // Mekân gerçekten var mı? Kontrol etmezsek SaveChanges'ta foreign key hatası (500) alırız.
-        _ = await _venueRepo.GetByIdAsync(realVenueId)
-            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
+        _ = await _venueRepo.GetByIdAsync(dto.VenueId)
+            ?? throw new KeyNotFoundException("Mekan bulunamadı.");
 
-        // Title, Description, EventDate AutoMapper ile doluyor; VenueId'yi biz set ediyoruz.
+        // Title, Description, EventDate ve VenueId AutoMapper ile doluyor.
         // Created* alanlarını AuditInterceptor kaydederken otomatik dolduruyor.
         var newEvent = _mapper.Map<Event>(dto);
-        newEvent.VenueId = realVenueId;
         // Status burada set edilmiyor: Event entity'si her zaman Draft başlıyor (bkz. Event.Status)
 
         await _eventRepo.AddAsync(newEvent);
@@ -56,12 +50,9 @@ public class EventService
         return _mapper.Map<EventResponseDto>(newEvent);
     }
 
-    public async Task<EventResponseDto> GetEventByIdAsync (string id)
+    public async Task<EventResponseDto> GetEventByIdAsync (int id)
     {
-        int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var foundEvent = await _eventRepo.GetByIdAsync(realEventId)
-            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
-            
+        var foundEvent = await GetEventAsync(id);
         return _mapper.Map<EventResponseDto>(foundEvent);
     }
 
@@ -71,14 +62,12 @@ public class EventService
         return _mapper.Map<List<EventResponseDto>>(rawEvents);
     }
 
-    public async Task<EventResponseDto> UpdateAsync(string id, UpdateEventDto dto)
+    public async Task<EventResponseDto> UpdateAsync(int id, UpdateEventDto dto)
     {
         if (dto.EventDate < DateTime.UtcNow)
             throw new ArgumentException("Etkinlik tarihi geçmiş bir tarihe alınamaz.");
 
-        int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
-            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
+        var existingEvent = await GetEventAsync(id);
 
         // İptal edilmiş etkinlik artık düzenlenemez (409 Conflict)
         if (existingEvent.Status == EventStatus.Cancelled)
@@ -93,36 +82,32 @@ public class EventService
         return _mapper.Map<EventResponseDto>(existingEvent);
     }
 
-    public async Task DeleteAsync (string id)
+    public async Task DeleteAsync (int id)
     {
-        int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
-            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
+        var existingEvent = await GetEventAsync(id);
 
         await _eventRepo.SoftDeleteAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();
     }
 
     // ---------- Durum değiştirme (yayınla / iptal et) ----------
-    // Kuralların kendisi Event entity'sinde (Publish/Cancel). Servisin işi sadece: id'yi çöz, kaydı getir,
+    // Kuralların kendisi Event entity'sinde (Publish/Cancel). Servisin işi sadece: kaydı getir,
     // entity'ye "yayınla" de, kaydet (kim/ne zaman bilgisini AuditInterceptor yazıyor). Kural ihlalinde entity 409'a dönen hata fırlatır.
 
     // Yayınlamak için etkinliğin kaç aktif satış bölümü olduğunu veritabanından sorup entity'ye veriyoruz;
     // "bölüm yoksa yayınlanamaz" kuralının kendisi Event.Publish içinde.
-    public Task<EventResponseDto> PublishAsync(string id)
+    public Task<EventResponseDto> PublishAsync(int id)
         => ChangeStatusAsync(id, async e => e.Publish(await _eventSectionRepo.CountByEventIdAsync(e.Id)));
 
-    public Task<EventResponseDto> CancelAsync(string id)
+    public Task<EventResponseDto> CancelAsync(int id)
         => ChangeStatusAsync(id, e => { e.Cancel(); return Task.CompletedTask; });
 
     // Yayınla ve iptal et aynı adımlardan geçiyor; sadece ortadaki işlem farklı.
     // Func<Event, Task> = "bir Event alan ve beklenebilir (async) bir iş yapan fonksiyon".
     // Async olmasının sebebi: yayınlamadan önce bölüm sayısını veritabanından sormamız gerekiyor.
-    private async Task<EventResponseDto> ChangeStatusAsync(string id, Func<Event, Task> transition)
+    private async Task<EventResponseDto> ChangeStatusAsync(int id, Func<Event, Task> transition)
     {
-        int realEventId = _hashids.DecodeId(id, "Etkinlik");
-        var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
-            ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
+        var existingEvent = await GetEventAsync(id);
 
         await transition(existingEvent);
 
@@ -131,4 +116,9 @@ public class EventService
 
         return _mapper.Map<EventResponseDto>(existingEvent);
     }
+
+    // "Kaydı getir, yoksa 404" tek yerde. id gerçek int (URL'deki hash'i [HashId] çözdü);
+    // mesajda yazmıyoruz ki gerçek id dışarı sızmasın.
+    private async Task<Event> GetEventAsync(int id)
+        => await _eventRepo.GetByIdAsync(id) ?? throw new KeyNotFoundException("Etkinlik bulunamadı.");
 }

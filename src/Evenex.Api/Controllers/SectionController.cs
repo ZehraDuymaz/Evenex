@@ -1,3 +1,4 @@
+using Evenex.Common.Hashing;
 using Evenex.Application.VenueSections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ public class SectionController : ControllerBase
 
     // GET api/section/venue/{venueId} -> o mekânın tüm bölümleri
     [HttpGet("venue/{venueId}")]
-    public async Task<IActionResult> GetSectionsByVenue (string venueId)
+    public async Task<IActionResult> GetSectionsByVenue ([HashId] int venueId)
         => Ok(await _sectionService.GetSectionsByVenueAsync(venueId));
 
     [Authorize]

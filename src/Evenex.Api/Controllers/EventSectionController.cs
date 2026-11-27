@@ -1,3 +1,4 @@
+using Evenex.Common.Hashing;
 using Evenex.Application.EventSections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +23,11 @@ public class EventSectionController : ControllerBase
 
     // GET api/eventsection/event/{eventId} -> o etkinliğin tüm satış bölümleri
     [HttpGet("event/{eventId}")]
-    public async Task<IActionResult> GetByEvent(string eventId)
+    public async Task<IActionResult> GetByEvent([HashId] int eventId)
         => Ok(await _eventSectionService.GetByEventAsync(eventId));
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    public async Task<IActionResult> GetById([HashId] int id)
         => Ok(await _eventSectionService.GetByIdAsync(id));
 
     [Authorize]
@@ -40,12 +41,12 @@ public class EventSectionController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] UpdateEventSectionDto dto)
+    public async Task<IActionResult> Update([HashId] int id, [FromBody] UpdateEventSectionDto dto)
         => Ok(await _eventSectionService.UpdateAsync(id, dto));
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<IActionResult> Delete([HashId] int id)
     {
         await _eventSectionService.DeleteAsync(id);
         return NoContent();

@@ -14,6 +14,7 @@ using Evenex.Application.VenueSections;
 using Evenex.Application.Abstractions;
 using Evenex.Application.Mappings;
 using Evenex.Api.Middleware;
+using Evenex.Api.ModelBinding;
 using Evenex.Infrastructure.Interceptors;
 using Evenex.Common.Hashing;
 
@@ -88,7 +89,9 @@ builder.Services.AddCors(options =>
 // JsonStringEnumConverter: enum'lar JSON'da sayı yerine İSİM olarak yazılır/okunur
 // ("status": "Published", 1 değil). Frontend'in "1 neydi?" diye ezber yapmasına gerek kalmaz.
 // Okurken hem "Published" hem eski usul sayı (1) kabul edilir.
-builder.Services.AddControllers()
+// ModelBinderProviders.Insert(0, ...): URL'deki [HashId] int parametreleri bizim binder'ımız çözsün.
+// En başa ekliyoruz ki ASP.NET'in hazır int binder'ından önce sorulsun.
+builder.Services.AddControllers(options => options.ModelBinderProviders.Insert(0, new HashIdModelBinderProvider()))
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi(options =>
 {
