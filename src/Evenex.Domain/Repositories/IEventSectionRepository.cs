@@ -11,5 +11,14 @@ namespace Evenex.Domain.Repositories;
 /// </summary>
 public interface IEventSectionRepository : IRepository<EventSection>
 {
+    // Bir etkinliğin silinmemiş tüm satış bölümleri
+    Task<IEnumerable<EventSection>> GetByEventIdAsync(int eventId);
+
+    // Bu bölüm bu etkinliğe daha önce eklenmiş mi? (aynı bölümü iki kez eklemeyi engellemek için)
+    Task<bool> ExistsAsync(int eventId, int sectionId);
+
+    // Etkinliğin kaç aktif satış bölümü var? (bölümsüz etkinlik yayınlanamaz kuralı için)
+    Task<int> CountByEventIdAsync(int eventId);
+
     Task IncrementCapacityAsync(int eventSectionId);
 }

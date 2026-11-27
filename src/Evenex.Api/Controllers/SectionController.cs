@@ -29,6 +29,7 @@ public class SectionController : ControllerBase
     public async Task<IActionResult> CreateNewSection ([FromBody] CreateSectionDto dto)
     {
         var created = await _sectionService.CreateVenueSectionAsync(dto);
-        return Created($"/api/section/{created.Id}", created);
+        // HashedId: created.Id gerçek int id, Location header'ında dışarı sızmamalı
+        return Created($"/api/section/{created.HashedId}", created);
     }
 }
