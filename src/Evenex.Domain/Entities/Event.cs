@@ -32,8 +32,12 @@ public class Event : BaseEntity
     // ---------- Durum geçişleri (iş kuralları entity'nin içinde) ----------
     // Kurallar burada olunca hangi servis çağırırsa çağırsın aynı kurallar geçerli; tek bir yerde yazılı.
 
-    /// <summary>Taslağı yayına alır. Sadece Draft durumundan yapılabilir.</summary>
-    public void Publish()
+    /// <summary>
+    /// Taslağı yayına alır. Sadece Draft durumundan ve en az bir satış bölümü varsa yapılabilir.
+    /// activeSectionCount: bu etkinliğin silinmemiş EventSection sayısı. Sayıyı servis veritabanından
+    /// alıp veriyor; böylece entity veritabanını bilmek zorunda kalmıyor, kural yine burada yazılı.
+    /// </summary>
+    public void Publish(int activeSectionCount)
     {
         if (Status != EventStatus.Draft)
             throw new InvalidEventStatusException(Status, "yayınlama");
@@ -42,8 +46,21 @@ public class Event : BaseEntity
         if (EventDate < DateTime.UtcNow)
             throw new InvalidEventStatusException(Status, "geçmiş tarihli etkinliği yayınlama");
 
-        // TODO: EventSection'lar yazılınca: en az bir satış bölümü yoksa yayınlanamasın.
+        // Satılacak hiçbir bölüm yoksa yayınlamak anlamsız: kimse bilet alamaz
+        if (activeSectionCount == 0)
+            throw new InvalidEventStatusException(Status, "satış bölümü olmadan yayınlama");
+
         Status = EventStatus.Published;
+    }
+
+    /// <summary>
+    /// Satış bölümleri (EventSection) eklenip/değiştirilip/silinebilir mi? Sadece taslakken.
+    /// Yayındayken bilet satılmış olabilir, iptal edilmişse zaten değişiklik anlamsız.
+    /// </summary>
+    public void EnsureSectionsEditable()
+    {
+        if (Status != EventStatus.Draft)
+            throw new InvalidEventStatusException(Status, "satış bölümü değişikliği");
     }
 
     /// <summary>Etkinliği iptal eder. Zaten iptal edilmişse tekrar iptal edilemez.</summary>

@@ -29,7 +29,7 @@ public class EventStatusTests
     {
         var ev = NewDraftEvent();
 
-        ev.Publish();
+        ev.Publish(activeSectionCount: 1);
 
         Assert.Equal(EventStatus.Published, ev.Status);
     }
@@ -38,9 +38,9 @@ public class EventStatusTests
     public void Publish_Twice_Throws()
     {
         var ev = NewDraftEvent();
-        ev.Publish();
+        ev.Publish(activeSectionCount: 1);
 
-        Assert.Throws<InvalidEventStatusException>(() => ev.Publish());
+        Assert.Throws<InvalidEventStatusException>(() => ev.Publish(activeSectionCount: 1));
     }
 
     [Fact]
@@ -48,8 +48,32 @@ public class EventStatusTests
     {
         var ev = NewDraftEvent(DateTime.UtcNow.AddDays(-1));
 
-        Assert.Throws<InvalidEventStatusException>(() => ev.Publish());
+        Assert.Throws<InvalidEventStatusException>(() => ev.Publish(activeSectionCount: 1));
         Assert.Equal(EventStatus.Draft, ev.Status); // hata olunca durum değişmemeli
+    }
+
+    [Fact]
+    public void Publish_WithoutSections_Throws()
+    {
+        // Satılacak bölüm yoksa yayınlanamaz
+        var ev = NewDraftEvent();
+
+        Assert.Throws<InvalidEventStatusException>(() => ev.Publish(activeSectionCount: 0));
+        Assert.Equal(EventStatus.Draft, ev.Status);
+    }
+
+    [Fact]
+    public void Sections_EditableOnlyWhileDraft()
+    {
+        var draft = NewDraftEvent();
+        var published = NewDraftEvent();
+        published.Publish(activeSectionCount: 1);
+        var cancelled = NewDraftEvent();
+        cancelled.Cancel();
+
+        draft.EnsureSectionsEditable(); // hata fırlatmamalı
+        Assert.Throws<InvalidEventStatusException>(() => published.EnsureSectionsEditable());
+        Assert.Throws<InvalidEventStatusException>(() => cancelled.EnsureSectionsEditable());
     }
 
     [Fact]
@@ -57,7 +81,7 @@ public class EventStatusTests
     {
         var draft = NewDraftEvent();
         var published = NewDraftEvent();
-        published.Publish();
+        published.Publish(activeSectionCount: 1);
 
         draft.Cancel();
         published.Cancel();
@@ -72,7 +96,7 @@ public class EventStatusTests
         var ev = NewDraftEvent();
         ev.Cancel();
 
-        Assert.Throws<InvalidEventStatusException>(() => ev.Publish());
+        Assert.Throws<InvalidEventStatusException>(() => ev.Publish(activeSectionCount: 1));
         Assert.Throws<InvalidEventStatusException>(() => ev.Cancel());
     }
 }

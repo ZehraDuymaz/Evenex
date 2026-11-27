@@ -16,14 +16,16 @@ public class EventService
 {
     private readonly IEventRepository _eventRepo;
     private readonly IVenueRepository _venueRepo;
+    private readonly IEventSectionRepository _eventSectionRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHashids _hashids;
     private readonly IMapper _mapper;
 
-    public EventService (IEventRepository eventRepo, IVenueRepository venueRepo, IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
+    public EventService (IEventRepository eventRepo, IVenueRepository venueRepo, IEventSectionRepository eventSectionRepo, IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
     {
         _eventRepo = eventRepo;
         _venueRepo = venueRepo;
+        _eventSectionRepo = eventSectionRepo;
         _unitOfWork = unitOfWork;
         _hashids = hashids;
         _mapper = mapper;
@@ -105,21 +107,24 @@ public class EventService
     // Kuralların kendisi Event entity'sinde (Publish/Cancel). Servisin işi sadece: id'yi çöz, kaydı getir,
     // entity'ye "yayınla" de, kaydet (kim/ne zaman bilgisini AuditInterceptor yazıyor). Kural ihlalinde entity 409'a dönen hata fırlatır.
 
+    // Yayınlamak için etkinliğin kaç aktif satış bölümü olduğunu veritabanından sorup entity'ye veriyoruz;
+    // "bölüm yoksa yayınlanamaz" kuralının kendisi Event.Publish içinde.
     public Task<EventResponseDto> PublishAsync(string id)
-        => ChangeStatusAsync(id, e => e.Publish());
+        => ChangeStatusAsync(id, async e => e.Publish(await _eventSectionRepo.CountByEventIdAsync(e.Id)));
 
     public Task<EventResponseDto> CancelAsync(string id)
-        => ChangeStatusAsync(id, e => e.Cancel());
+        => ChangeStatusAsync(id, e => { e.Cancel(); return Task.CompletedTask; });
 
     // Yayınla ve iptal et aynı adımlardan geçiyor; sadece ortadaki işlem farklı.
-    // Action<Event> = "bir Event alan ve bir şey yapan fonksiyon" (örn. e => e.Publish()).
-    private async Task<EventResponseDto> ChangeStatusAsync(string id, Action<Event> transition)
+    // Func<Event, Task> = "bir Event alan ve beklenebilir (async) bir iş yapan fonksiyon".
+    // Async olmasının sebebi: yayınlamadan önce bölüm sayısını veritabanından sormamız gerekiyor.
+    private async Task<EventResponseDto> ChangeStatusAsync(string id, Func<Event, Task> transition)
     {
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
         var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
-        transition(existingEvent);
+        await transition(existingEvent);
 
         await _eventRepo.UpdateAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();

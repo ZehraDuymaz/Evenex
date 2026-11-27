@@ -8,6 +8,7 @@ using Evenex.Infrastructure.Auth;
 using Scalar.AspNetCore;
 using HashidsNet;
 using Evenex.Application.Events;
+using Evenex.Application.EventSections;
 using Evenex.Application.Venues;
 using Evenex.Application.VenueSections;
 using Evenex.Application.Abstractions;
@@ -64,6 +65,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<VenueService>();
 builder.Services.AddScoped<SectionService>();
+builder.Services.AddScoped<EventSectionService>();
 
 // Yakalanmayan exception'ları doğru HTTP koduna çeviren handler (bkz. Middleware/GlobalExceptionHandler.cs)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
