@@ -33,7 +33,7 @@ public class SectionService
         return _mapper.Map<List<SectionResponseDto>>(sections);
     }
 
-    public async Task<SectionResponseDto> CreateVenueSectionAsync (CreateSectionDto dto, string userEmail, string userIp)
+    public async Task<SectionResponseDto> CreateVenueSectionAsync (CreateSectionDto dto)
     {
         int realVenueId = _hashids.DecodeId(dto.VenueId, "Mekan");
 
@@ -43,10 +43,6 @@ public class SectionService
 
         var newSection = _mapper.Map<Section>(dto);
         newSection.VenueId = realVenueId;
-        newSection.CreatedUser = userEmail;
-        newSection.CreatedDate = DateTime.UtcNow;
-        newSection.CreatedIP = userIp;
-        newSection.IsDeleted = false;
 
         await _sectionRepo.AddAsync(newSection);
         await _unitOfWork.SaveChangesAsync();

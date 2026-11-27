@@ -26,12 +26,16 @@ public abstract record BaseDto
     private int _id;
     private string _hashedId = string.Empty;
 
+    // id API response'da gözükmesin diye
     [JsonIgnore]
     public int Id
     {
+        // dto id'sini oku
         get => _id;
+        // dto id'sini nesne oluşturulurken yaz 
         init
         {
+            // value = getInput gibi bir şey. 
             _id = value;
             // 0 = "henüz id yok" (kaydedilmemiş entity); onu hash'lemenin anlamı yok
             if (value > 0)
@@ -39,10 +43,13 @@ public abstract record BaseDto
         }
     }
 
+    // json'da id olarak gözüküyor, hashedId değil. 
     [JsonPropertyName("id")]
     public string HashedId
     {
+        // dto.hashedId'yi oku
         get => _hashedId;
+        // oluştururken yazma. hash değerini (value) depolar
         init
         {
             _hashedId = value;

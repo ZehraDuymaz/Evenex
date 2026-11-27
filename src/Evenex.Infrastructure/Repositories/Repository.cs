@@ -51,7 +51,8 @@ public abstract class Repository<T> : IRepository<T> where T : BaseEntity
     public virtual Task SoftDeleteAsync(T entity)
     {
         entity.IsDeleted = true;
-        entity.ModifiedDate = DateTime.UtcNow;
+        // ModifiedDate/User/IP burada set edilmiyor: entity "Modified" olarak işaretlendiği için
+        // AuditInterceptor kaydederken "kim, ne zaman, nereden sildi" bilgisini otomatik yazıyor.
         _set.Update(entity);
         return Task.CompletedTask;
     }

@@ -1,4 +1,3 @@
-using Evenex.Application.Abstractions;
 using Evenex.Application.Venues;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +14,11 @@ namespace Evenex.Api.Controllers;
 public class VenueController : ControllerBase
 {
     private readonly VenueService _venueService;
-    private readonly ICurrentUserService _currentUser;
 
-    public VenueController (VenueService venueService, ICurrentUserService currentUser)
+    public VenueController (VenueService venueService)
     {
         _venueService = venueService;
-        _currentUser = currentUser;
     }
-
-    // İsteği yapan istemcinin IP adresi (audit alanları için: CreatedIP / ModifiedIP)
-    private string ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
     [HttpGet]
     public async Task<IActionResult> GetAll () => Ok(await _venueService.GetAllVenuesAsync());
@@ -36,7 +30,7 @@ public class VenueController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateNewVenue ([FromBody] CreateVenueDto dto)
     {
-        var created = await _venueService.CreateVenueAsync(dto, _currentUser.Email, ClientIp);
+        var created = await _venueService.CreateVenueAsync(dto);
 
         // 201 Created + "Location: /api/venue/{id}" header'ı + oluşan kaydın kendisi
         // Location header'ına hash'li id: created.Id gerçek int id'dir, dışarı sızmamalı
@@ -46,7 +40,7 @@ public class VenueController : ControllerBase
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateVenue (string id, [FromBody] UpdateVenueDto dto)
-        => Ok(await _venueService.UpdateAsync(id, dto, _currentUser.Email, ClientIp));
+        => Ok(await _venueService.UpdateAsync(id, dto));
 
     [Authorize]
     [HttpDelete("{id}")]

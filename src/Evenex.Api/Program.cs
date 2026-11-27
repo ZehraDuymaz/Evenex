@@ -13,12 +13,18 @@ using Evenex.Application.VenueSections;
 using Evenex.Application.Abstractions;
 using Evenex.Application.Mappings;
 using Evenex.Api.Middleware;
+using Evenex.Infrastructure.Interceptors;
 using Evenex.Common.Hashing;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Database bağlama
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// AuditInterceptor: her SaveChanges'tan önce Created*/Modified* alanlarını otomatik doldurur.
+// Scoped, çünkü o anki isteğin kullanıcısını (ICurrentUserService) bilmesi gerekiyor.
+builder.Services.AddScoped<AuditInterceptor>();
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) => options
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>()));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
