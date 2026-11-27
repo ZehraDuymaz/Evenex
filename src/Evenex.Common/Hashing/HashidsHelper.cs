@@ -12,6 +12,7 @@ namespace Evenex.Common.Hashing;
 /// </summary>
 public static class HashidsHelper
 {
+    // Configure çağırılana kadar IHashids null olabilir.
     private static IHashids? _hashids;
 
     // Uygulama açılırken bir kere çağrılır (testlerde de test başında)
@@ -19,13 +20,12 @@ public static class HashidsHelper
 
     // Configure unutulursa sessizce yanlış çalışmak yerine hemen ve açık bir mesajla patlasın
     private static IHashids Instance =>
-        _hashids ?? throw new InvalidOperationException("HashidsHelper.Configure çağrılmadan kullanıldı (Program.cs'e bakın).");
+        _hashids ?? throw new InvalidOperationException("HashidsHelper.Configure çağrılmadan kullanıldı.");
 
     // 7 -> "k1JppaeX"
     public static string Encode(int id) => Instance.Encode(id);
 
     // "k1JppaeX" -> 7. Bizim üretmediğimiz (uydurulmuş/bozuk) bir değer gelirse FormatException fırlatır:
-    // JSON okunurken fırlatılan FormatException'ı ASP.NET 400 Bad Request'e çevirir, uygulama 500 vermez.
     public static int Decode(string hashedId)
     {
         var decoded = Instance.Decode(hashedId);

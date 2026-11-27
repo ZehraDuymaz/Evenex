@@ -47,4 +47,8 @@ public class CurrentUserService : ICurrentUserService
 
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+
+    // Bağlantının geldiği IP. HTTP isteği dışında (örn. testte) HttpContext yoksa "unknown".
+    public string IpAddress =>
+        _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 }

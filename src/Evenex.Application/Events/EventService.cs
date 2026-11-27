@@ -29,7 +29,7 @@ public class EventService
         _mapper = mapper;
     }
 
-    public async Task<EventResponseDto> CreateEventAsync (CreateEventDto dto, string userEmail, string userIp)
+    public async Task<EventResponseDto> CreateEventAsync (CreateEventDto dto)
     {
         // ArgumentException -> GlobalExceptionHandler bunu 400 Bad Request'e çevirir
         if (dto.EventDate < DateTime.UtcNow)
@@ -41,14 +41,11 @@ public class EventService
         _ = await _venueRepo.GetByIdAsync(realVenueId)
             ?? throw new KeyNotFoundException($"Mekan bulunamadı: {dto.VenueId}");
 
-        // Title, Description, EventDate AutoMapper ile doluyor; geri kalanları biz set ediyoruz.
+        // Title, Description, EventDate AutoMapper ile doluyor; VenueId'yi biz set ediyoruz.
+        // Created* alanlarını AuditInterceptor kaydederken otomatik dolduruyor.
         var newEvent = _mapper.Map<Event>(dto);
         newEvent.VenueId = realVenueId;
         // Status burada set edilmiyor: Event entity'si her zaman Draft başlıyor (bkz. Event.Status)
-        newEvent.CreatedUser = userEmail;
-        newEvent.CreatedDate = DateTime.UtcNow;
-        newEvent.CreatedIP = userIp;
-        newEvent.IsDeleted = false;
 
         await _eventRepo.AddAsync(newEvent);
         // SaveChanges'tan sonra veritabanı newEvent.Id'yi doldurmuş olur
@@ -72,7 +69,7 @@ public class EventService
         return _mapper.Map<List<EventResponseDto>>(rawEvents);
     }
 
-    public async Task<EventResponseDto> UpdateAsync(string id, UpdateEventDto dto, string updatedByMail, string updatedByIp)
+    public async Task<EventResponseDto> UpdateAsync(string id, UpdateEventDto dto)
     {
         if (dto.EventDate < DateTime.UtcNow)
             throw new ArgumentException("Etkinlik tarihi geçmiş bir tarihe alınamaz.");
@@ -87,9 +84,6 @@ public class EventService
 
         // Map(kaynak, hedef): yeni nesne oluşturmaz, var olan entity'nin alanlarını DTO'dakilerle günceller
         _mapper.Map(dto, existingEvent);
-        existingEvent.ModifiedUser = updatedByMail;
-        existingEvent.ModifiedDate = DateTime.UtcNow;
-        existingEvent.ModifiedIP = updatedByIp;
 
         await _eventRepo.UpdateAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();
@@ -109,26 +103,23 @@ public class EventService
 
     // ---------- Durum değiştirme (yayınla / iptal et) ----------
     // Kuralların kendisi Event entity'sinde (Publish/Cancel). Servisin işi sadece: id'yi çöz, kaydı getir,
-    // entity'ye "yayınla" de, kim/ne zaman bilgisini yaz, kaydet. Kural ihlalinde entity 409'a dönen hata fırlatır.
+    // entity'ye "yayınla" de, kaydet (kim/ne zaman bilgisini AuditInterceptor yazıyor). Kural ihlalinde entity 409'a dönen hata fırlatır.
 
-    public Task<EventResponseDto> PublishAsync(string id, string userEmail, string userIp)
-        => ChangeStatusAsync(id, e => e.Publish(), userEmail, userIp);
+    public Task<EventResponseDto> PublishAsync(string id)
+        => ChangeStatusAsync(id, e => e.Publish());
 
-    public Task<EventResponseDto> CancelAsync(string id, string userEmail, string userIp)
-        => ChangeStatusAsync(id, e => e.Cancel(), userEmail, userIp);
+    public Task<EventResponseDto> CancelAsync(string id)
+        => ChangeStatusAsync(id, e => e.Cancel());
 
     // Yayınla ve iptal et aynı adımlardan geçiyor; sadece ortadaki işlem farklı.
     // Action<Event> = "bir Event alan ve bir şey yapan fonksiyon" (örn. e => e.Publish()).
-    private async Task<EventResponseDto> ChangeStatusAsync(string id, Action<Event> transition, string userEmail, string userIp)
+    private async Task<EventResponseDto> ChangeStatusAsync(string id, Action<Event> transition)
     {
         int realEventId = _hashids.DecodeId(id, "Etkinlik");
         var existingEvent = await _eventRepo.GetByIdAsync(realEventId)
             ?? throw new KeyNotFoundException($"Etkinlik bulunamadı: {id}");
 
         transition(existingEvent);
-        existingEvent.ModifiedUser = userEmail;
-        existingEvent.ModifiedDate = DateTime.UtcNow;
-        existingEvent.ModifiedIP = userIp;
 
         await _eventRepo.UpdateAsync(existingEvent);
         await _unitOfWork.SaveChangesAsync();

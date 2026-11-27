@@ -39,14 +39,11 @@ public class VenueService
         return _mapper.Map<VenueResponseDto>(venue);
     }
 
-    public async Task<VenueResponseDto> CreateVenueAsync (CreateVenueDto dto, string userEmail, string userIp)
+    public async Task<VenueResponseDto> CreateVenueAsync (CreateVenueDto dto)
     {
-        // Name ve Address AutoMapper ile doluyor; kim/ne zaman/nereden bilgisini biz ekliyoruz.
+        // Name ve Address AutoMapper ile doluyor. Kim/ne zaman/nereden (Created*) bilgisini
+        // AuditInterceptor kaydederken otomatik ekliyor.
         var newVenue = _mapper.Map<Venue>(dto);
-        newVenue.CreatedUser = userEmail;
-        newVenue.CreatedDate = DateTime.UtcNow;
-        newVenue.CreatedIP = userIp;
-        newVenue.IsDeleted = false;
 
         await _venueRepo.AddAsync(newVenue);
         await _unitOfWork.SaveChangesAsync();
@@ -54,7 +51,7 @@ public class VenueService
         return _mapper.Map<VenueResponseDto>(newVenue);
     }
 
-    public async Task<VenueResponseDto> UpdateAsync (string id, UpdateVenueDto dto, string updatedByMail, string updatedByIp)
+    public async Task<VenueResponseDto> UpdateAsync (string id, UpdateVenueDto dto)
     {
         int realVenueId = _hashids.DecodeId(id, "Mekan");
         var venue = await _venueRepo.GetByIdAsync(realVenueId)
@@ -62,9 +59,6 @@ public class VenueService
 
         // Var olan entity'nin Name/Address alanlarını DTO'dakilerle üzerine yazar
         _mapper.Map(dto, venue);
-        venue.ModifiedUser = updatedByMail;
-        venue.ModifiedDate = DateTime.UtcNow;
-        venue.ModifiedIP = updatedByIp;
 
         await _venueRepo.UpdateAsync(venue);
         await _unitOfWork.SaveChangesAsync();

@@ -11,4 +11,6 @@ public interface ICurrentUserService
     IReadOnlyCollection<string> Roles { get; }
     IReadOnlyCollection<string> Permissions { get; }
     bool IsAuthenticated { get; }
+    // İsteği yapan istemcinin IP adresi (audit alanları için: CreatedIP / ModifiedIP)
+    string IpAddress { get; }
 }

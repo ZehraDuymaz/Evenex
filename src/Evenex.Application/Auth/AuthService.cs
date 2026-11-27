@@ -44,11 +44,10 @@ public class AuthService
             Email = request.Email,
             PasswordHash = _passwordHasher.Hash(request.Password),
             Role = UserRole.User,
-            CreatedIP = "127.0.0.1",       // TODO: gerçek IP controller'dan alınıp buraya verilmeli (şimdilik test için sabit)
-            CreatedUser = request.Email,   // Kullanıcı kendi kendini kaydediyor, yani oluşturan da kendisi
-            CreatedDate = DateTime.UtcNow, // Kayıt olduğu an (her zaman UTC tutuyoruz)
-            IsDeleted = false 
-
+            // Kullanıcı kendi kendini kaydediyor, yani oluşturan da kendisi. Bunu elle veriyoruz çünkü
+            // kayıt anında henüz token yok; AuditInterceptor dolu olan CreatedUser'ı ezmiyor.
+            // CreatedDate ve CreatedIP (artık gerçek IP) AuditInterceptor tarafından otomatik dolduruluyor.
+            CreatedUser = request.Email
         };
 
         // user ekle 
