@@ -1,3 +1,4 @@
+using Evenex.Common.Hashing;
 using Evenex.Application.Venues;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ public class VenueController : ControllerBase
     public async Task<IActionResult> GetAll () => Ok(await _venueService.GetAllVenuesAsync());
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetVenueById (string id) => Ok(await _venueService.GetByIdAsync(id));
+    public async Task<IActionResult> GetVenueById ([HashId] int id) => Ok(await _venueService.GetByIdAsync(id));
 
     [Authorize]
     [HttpPost]
@@ -39,12 +40,12 @@ public class VenueController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateVenue (string id, [FromBody] UpdateVenueDto dto)
+    public async Task<IActionResult> UpdateVenue ([HashId] int id, [FromBody] UpdateVenueDto dto)
         => Ok(await _venueService.UpdateAsync(id, dto));
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteVenue (string id)
+    public async Task<IActionResult> DeleteVenue ([HashId] int id)
     {
         await _venueService.DeleteAsync(id);
         return NoContent(); // 204: başarılı, geri dönecek içerik yok

@@ -63,7 +63,7 @@ public class MappingProfileTests
         var dto = _mapper.Map<EventResponseDto>(ev);
 
         Assert.Equal(_hashids.Encode(7), dto.HashedId);
-        Assert.Equal(_hashids.Encode(42), dto.VenueId);   // foreign key MappingProfile'da hash'lendi
+        Assert.Equal(42, dto.VenueId);                    // içeride gerçek int; hash'leme JSON'a yazılırken ([HashId])
         Assert.Equal("Konser", dto.Title);
         Assert.Equal(EventStatus.Draft, dto.Status);
     }
@@ -98,6 +98,40 @@ public class MappingProfileTests
         var json = "{\"id\":\"uydurma!!\",\"name\":\"x\",\"address\":\"y\",\"capacity\":0}";
 
         Assert.Throws<FormatException>(() => JsonSerializer.Deserialize<VenueResponseDto>(json, WebJson));
+    }
+
+    [Fact]
+    public void ForeignKey_Json_IsHashedOnTheWayOut()
+    {
+        var dto = _mapper.Map<EventResponseDto>(new Event { Id = 7, VenueId = 42, Title = "Konser", Description = "x", EventDate = new DateTime(2030, 1, 1) });
+
+        var json = JsonSerializer.Serialize(dto, WebJson);
+
+        // [HashId] sayesinde venueId JSON'da hash'li metin; gerçek 42 hiçbir yerde yok
+        Assert.Contains($"\"venueId\":\"{_hashids.Encode(42)}\"", json);
+        Assert.DoesNotContain("42", json);
+    }
+
+    [Fact]
+    public void ForeignKey_Json_IsDecodedOnTheWayIn()
+    {
+        // Frontend etkinlik oluştururken venueId'yi hash olarak gönderir; DTO'ya gerçek int olarak gelir
+        var json = $"{{\"venueId\":\"{_hashids.Encode(42)}\",\"title\":\"t\",\"description\":\"d\",\"eventDate\":\"2030-01-01T00:00:00Z\"}}";
+
+        var dto = JsonSerializer.Deserialize<CreateEventDto>(json, WebJson)!;
+
+        Assert.Equal(42, dto.VenueId);
+    }
+
+    [Theory]
+    [InlineData("\"uydurma!!\"")]  // uydurma hash
+    [InlineData("42")]              // gerçek sayıyı doğrudan göndermek de reddedilir (tahmin edilebilir id'ler)
+    public void ForeignKey_Json_InvalidValue_IsRejected(string venueIdJson)
+    {
+        var json = $"{{\"venueId\":{venueIdJson},\"title\":\"t\",\"description\":\"d\",\"eventDate\":\"2030-01-01T00:00:00Z\"}}";
+
+        // JsonException -> API'de 400 Bad Request
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CreateEventDto>(json, WebJson));
     }
 
     [Fact]

@@ -25,11 +25,15 @@ export function getErrorMessage(error: unknown): string {
     return body;
   }
 
-  // 3. Validation hatası: errors objesindeki ilk mesajı al
+  // 3. Validation hatası: errors objesinden bir mesaj al.
+  // Gövde okunamazsa ASP.NET asıl hatanın ("$.venueId": "Geçersiz id: ...") yanına genel bir
+  // "The dto field is required." da ekliyor. Kullanıcıya asıl sebebi göstermek için önce belirli bir
+  // JSON alanına ait ("$." ile başlayan) hatayı seçiyoruz; yoksa ilk hatayı.
   if (body?.errors && typeof body.errors === 'object') {
-    const firstMessages = Object.values(body.errors)[0];
-    if (Array.isArray(firstMessages) && firstMessages.length > 0) {
-      return String(firstMessages[0]);
+    const entries = Object.entries(body.errors);
+    const [, messages] = entries.find(([key]) => key.startsWith('$.')) ?? entries[0] ?? [];
+    if (Array.isArray(messages) && messages.length > 0) {
+      return String(messages[0]);
     }
   }
 

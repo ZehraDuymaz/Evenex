@@ -55,6 +55,19 @@ public class AppDbContext : DbContext
         // HasMaxLength(20): nvarchar(max) yerine kısa kolon (en uzun değer "Published" = 9 karakter).
         modelBuilder.Entity<Event>().Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
+        // RowVersion: SQL Server'ın "rowversion" tipi. Değerini her INSERT/UPDATE'te veritabanı KENDİSİ değiştirir.
+        // EF bunu concurrency token olarak kullanır: UPDATE ... WHERE Id = @id AND RowVersion = @eskiDeger.
+        // Bu arada başkası kaydı değiştirdiyse hiçbir satır güncellenmez ve EF DbUpdateConcurrencyException fırlatır;
+        // böylece aynı anda gelen iki satış son yeri iki kez satamaz.
+        modelBuilder.Entity<EventSection>().Property(es => es.RowVersion).IsRowVersion();
+
+        // Aynı bölüm aynı etkinliğe iki kez eklenemez. HasFilter: silinmiş (soft delete) kayıtlar sayılmaz,
+        // yani bir bölüm silinip sonra yeniden eklenebilir.
+        modelBuilder.Entity<EventSection>()
+            .HasIndex(es => new { es.EventId, es.SectionId })
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
+
         // Para alanları: toplam 18 basamak, virgülden sonra 2 basamak (örn. 1234567890123456.78).
         // Belirtilmezse EF uyarı veriyor ve büyük değerler sessizce kırpılabiliyor.
         modelBuilder.Entity<EventSection>().Property(es => es.BasePrice).HasPrecision(18, 2);

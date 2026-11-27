@@ -1,3 +1,4 @@
+using Evenex.Common.Hashing;
 using Evenex.Application.VenueSections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ public class SectionController : ControllerBase
 
     // GET api/section/venue/{venueId} -> o mekânın tüm bölümleri
     [HttpGet("venue/{venueId}")]
-    public async Task<IActionResult> GetSectionsByVenue (string venueId)
+    public async Task<IActionResult> GetSectionsByVenue ([HashId] int venueId)
         => Ok(await _sectionService.GetSectionsByVenueAsync(venueId));
 
     [Authorize]
@@ -29,6 +30,7 @@ public class SectionController : ControllerBase
     public async Task<IActionResult> CreateNewSection ([FromBody] CreateSectionDto dto)
     {
         var created = await _sectionService.CreateVenueSectionAsync(dto);
-        return Created($"/api/section/{created.Id}", created);
+        // HashedId: created.Id gerçek int id, Location header'ında dışarı sızmamalı
+        return Created($"/api/section/{created.HashedId}", created);
     }
 }

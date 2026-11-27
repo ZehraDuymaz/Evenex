@@ -1,8 +1,6 @@
 using AutoMapper;
-using Evenex.Application.Common;
 using Evenex.Domain.Entities;
 using Evenex.Domain.Repositories;
-using HashidsNet;
 
 namespace Evenex.Application.Venues;
 
@@ -13,14 +11,12 @@ public class VenueService
 {
     private readonly IVenueRepository _venueRepo;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHashids _hashids;
     private readonly IMapper _mapper;
 
-    public VenueService (IVenueRepository venueRepo, IUnitOfWork unitOfWork, IHashids hashids, IMapper mapper)
+    public VenueService (IVenueRepository venueRepo, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _venueRepo = venueRepo;
         _unitOfWork = unitOfWork;
-        _hashids = hashids;
         _mapper = mapper;
     }
 
@@ -30,14 +26,9 @@ public class VenueService
         return _mapper.Map<List<VenueResponseDto>>(rawVenues);
     }
 
-    public async Task<VenueResponseDto> GetByIdAsync (string id)
-    {
-        int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetByIdAsync(realVenueId)
-            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
-
-        return _mapper.Map<VenueResponseDto>(venue);
-    }
+    // id artık gerçek int: URL'deki hash'i controller'daki [HashId] (model binder) çözdü
+    public async Task<VenueResponseDto> GetByIdAsync (int id)
+        => _mapper.Map<VenueResponseDto>(await GetVenueAsync(id));
 
     public async Task<VenueResponseDto> CreateVenueAsync (CreateVenueDto dto)
     {
@@ -51,11 +42,9 @@ public class VenueService
         return _mapper.Map<VenueResponseDto>(newVenue);
     }
 
-    public async Task<VenueResponseDto> UpdateAsync (string id, UpdateVenueDto dto)
+    public async Task<VenueResponseDto> UpdateAsync (int id, UpdateVenueDto dto)
     {
-        int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetByIdAsync(realVenueId)
-            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
+        var venue = await GetVenueAsync(id);
 
         // Var olan entity'nin Name/Address alanlarını DTO'dakilerle üzerine yazar
         _mapper.Map(dto, venue);
@@ -66,13 +55,15 @@ public class VenueService
         return _mapper.Map<VenueResponseDto>(venue);
     }
 
-    public async Task DeleteAsync (string id)
+    public async Task DeleteAsync (int id)
     {
-        int realVenueId = _hashids.DecodeId(id, "Mekan");
-        var venue = await _venueRepo.GetByIdAsync(realVenueId)
-            ?? throw new KeyNotFoundException($"Mekan bulunamadı: {id}");
+        var venue = await GetVenueAsync(id);
 
         await _venueRepo.SoftDeleteAsync(venue);
         await _unitOfWork.SaveChangesAsync();
     }
+
+    // "Kaydı getir, yoksa 404" tek yerde. Mesajda id yazmıyoruz: bu gerçek int id, dışarı sızmamalı.
+    private async Task<Venue> GetVenueAsync(int id)
+        => await _venueRepo.GetByIdAsync(id) ?? throw new KeyNotFoundException("Mekan bulunamadı.");
 }
