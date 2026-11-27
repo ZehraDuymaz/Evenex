@@ -17,17 +17,23 @@
     Henüz hiç mekan yok. <a routerLink="/admin/venues/create">İlk mekanı ekleyin.</a>
   </div>
 } @else {
-  <div class="card-list">
+  <!-- row-list: etkinlikler sayfasıyla aynı satır düzeni (bkz. styles.scss) -->
+  <div class="row-list">
     <!-- track: Angular her kartı id ile takip eder; liste değişince sadece değişen kartı yeniden çizer -->
     @for (venue of venues(); track venue.id) {
       <article class="list-card">
-        <h3 class="list-card-title">{{ venue.name }}</h3>
-        <p class="list-card-meta">{{ venue.address }}</p>
+        <div class="list-card-body">
+          <h3 class="list-card-title">{{ venue.name }}</h3>
+          <p class="list-card-meta">{{ venue.address }}</p>
+        </div>
         <div class="list-card-footer">
           <span class="badge">ID: {{ venue.id }}</span>
-          <button class="link-danger" (click)="deleteVenue(venue)" [disabled]="deletingId() === venue.id">
-            {{ deletingId() === venue.id ? 'Siliniyor...' : 'Sil' }}
-          </button>
+          <div class="card-actions">
+            <a class="link-primary" [routerLink]="['/admin/venues', venue.id, 'sections']">Bölümler</a>
+            <button class="link-danger" (click)="deleteVenue(venue)" [disabled]="deletingId() === venue.id">
+              {{ deletingId() === venue.id ? 'Siliniyor...' : 'Sil' }}
+            </button>
+          </div>
         </div>
       </article>
     }

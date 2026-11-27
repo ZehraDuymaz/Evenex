@@ -1,0 +1,39 @@
+<div class="page-header">
+  <div>
+    <h2 class="page-title">{{ venue()?.name ?? 'Mekan' }}: Bölümler</h2>
+    <p class="page-subtitle">Mekanın bölümlerini (tribün, sahne önü...) tanımlayın. Fiyat ve kontenjan her etkinlikte ayrıca belirlenir.</p>
+  </div>
+  <app-ui-button variant="default" [routerLink]="['/admin/venues']">Mekanlara dön</app-ui-button>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger list-alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <div class="state-message">Bölümler yükleniyor...</div>
+} @else if (venue()) {
+  <!-- Yeni bölüm ekleme formu: tek satırda ad + tür + buton -->
+  <form class="inline-form" [formGroup]="sectionForm" (ngSubmit)="addSection()" novalidate>
+    <app-ui-input label="Bölüm Adı" formControlName="name" placeholder="örn. Tribün A" [error]="nameError()"></app-ui-input>
+    <app-ui-select label="Tür" formControlName="type" [options]="typeOptions" placeholder="Tür seçin"></app-ui-select>
+    <app-ui-button variant="primary" type="submit" [class.disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Ekleniyor...' : 'Bölüm Ekle' }}
+    </app-ui-button>
+  </form>
+
+  @if (sections().length === 0) {
+    <div class="state-message">Bu mekanda henüz bölüm yok. Yukarıdan ilk bölümü ekleyin.</div>
+  } @else {
+    <div class="card-list">
+      @for (section of sections(); track section.id) {
+        <article class="list-card">
+          <h3 class="list-card-title">{{ section.name }}</h3>
+          <div class="list-card-footer">
+            <span class="badge">{{ typeLabel(section.type) }}</span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+}

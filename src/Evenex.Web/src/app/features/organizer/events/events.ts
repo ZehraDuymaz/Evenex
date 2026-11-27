@@ -7,14 +7,7 @@ import { EventService } from '../../../core/services/event.service';
 import { VenueService } from '../../../core/services/venue.service';
 import { EventResponse, EventStatus, VenueResponse } from '../../../core/models/api.models';
 import { getErrorMessage } from '../../../core/utils/api-error';
-
-// Backend'deki durum kodlarının ekranda görünecek Türkçe karşılıkları.
-// Record<EventStatus, string>: 3 durumun HEPSİ yazılmak zorunda; biri unutulursa TypeScript hata verir.
-const STATUS_LABELS: Record<EventStatus, string> = {
-  Draft: 'Taslak',
-  Published: 'Yayında',
-  Cancelled: 'İptal edildi'
-};
+import { EVENT_STATUS_LABELS } from '../../../core/labels';
 
 @Component({
   selector: 'app-events',
@@ -62,7 +55,7 @@ export class Events implements OnInit {
   }
 
   statusLabel(status: EventStatus): string {
-    return STATUS_LABELS[status];
+    return EVENT_STATUS_LABELS[status];
   }
 
   publishEvent(event: EventResponse): void {

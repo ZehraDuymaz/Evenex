@@ -211,3 +211,77 @@ h6 {
   opacity: 0.5;
   cursor: wait;
 }
+
+/* Tek satırlık ekleme formu (bölüm sayfaları): alanlar yan yana, buton en sağda, alanların alt hizasında */
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.inline-form > app-ui-input,
+.inline-form > app-ui-select {
+  flex: 1 1 180px;
+}
+
+/* İstek sürerken butonu soluk ve tıklanamaz yap */
+app-ui-button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Satır listesi (etkinlikler): her kayıt tam genişlikte bir satır; solda bilgiler, sağda rozet + butonlar.
+   Çok butonlu kartlarda kare ızgara dar kalıyordu ("İptal et" iki satıra bölünüyordu). */
+.row-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.row-list .list-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.list-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0; /* uzun açıklama satırı taşırmasın, kısalsın */
+}
+
+.row-list .list-card-footer {
+  flex-shrink: 0; /* butonlar sıkışmasın, bilgiler daralsın */
+  gap: 1.25rem;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Telefonda yan yana sığmaz: bilgiler üstte, butonlar altta */
+@media (max-width: 640px) {
+  .row-list .list-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row-list .list-card-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+/* Buton yazıları asla iki satıra bölünmesin; link (<a>) olanlar da buton gibi görünsün (alt çizgi yok) */
+.link-primary,
+.link-danger {
+  white-space: nowrap;
+  text-decoration: none;
+}

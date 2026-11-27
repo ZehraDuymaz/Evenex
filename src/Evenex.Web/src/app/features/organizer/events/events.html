@@ -17,19 +17,23 @@
     Henüz hiç etkinlik yok. <a routerLink="/admin/events/create">İlk etkinliği oluşturun.</a>
   </div>
 } @else {
-  <div class="card-list">
+  <!-- row-list: kartlar yan yana kare değil, alt alta satır olarak dizilir (çok butonlu listeler için) -->
+  <div class="row-list">
     @for (event of events(); track event.id) {
       <article class="list-card">
-        <h3 class="list-card-title">{{ event.title }}</h3>
-        <!-- date pipe: UTC ISO tarihi Türkiye saatine çevirip Türkçe biçimler, örn. "12 Ara 2026, 20:00".
-             Biçim ve saat dilimi burada yazılmıyor; app.config.ts'teki varsayılanlardan (core/date.config.ts) geliyor. -->
-        <p class="list-card-meta">{{ event.eventDate | date }}</p>
-        <p class="list-card-meta">{{ venueName(event.venueId) }}</p>
-        <p class="list-card-meta">{{ event.description }}</p>
+        <div class="list-card-body">
+          <h3 class="list-card-title">{{ event.title }}</h3>
+          <!-- date pipe: UTC ISO tarihi Türkiye saatine çevirip Türkçe biçimler, örn. "12 Ara 2026, 20:00".
+               Biçim ve saat dilimi burada yazılmıyor; app.config.ts'teki varsayılanlardan (core/date.config.ts) geliyor. -->
+          <p class="list-card-meta">{{ event.eventDate | date }} · {{ venueName(event.venueId) }}</p>
+          <p class="list-card-meta">{{ event.description }}</p>
+        </div>
         <div class="list-card-footer">
           <!-- Durum rozetinin rengi duruma göre değişir: badge-Draft / badge-Published / badge-Cancelled -->
           <span class="badge" [class]="'badge-' + event.status">{{ statusLabel(event.status) }}</span>
           <div class="card-actions">
+            <!-- Satış bölümleri (fiyat/kontenjan); yayınlamadan önce en az bir bölüm eklenmeli -->
+            <a class="link-primary" [routerLink]="['/admin/events', event.id, 'sections']">Bölümler</a>
             <!-- Sadece izin verilen eylemlerin butonu görünür (kurallar backend'deki Event.Publish/Cancel ile aynı) -->
             @if (event.status === 'Draft') {
               <button class="link-primary" (click)="publishEvent(event)" [disabled]="changingStatusId() === event.id">Yayınla</button>

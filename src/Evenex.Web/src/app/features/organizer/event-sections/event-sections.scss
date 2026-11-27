@@ -1,0 +1,16 @@
+.list-alert {
+  margin-bottom: 1.5rem;
+}
+
+.page-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// Kart içindeki düzenleme formu: alanlar alt alta
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
