@@ -10,6 +10,8 @@ import { Settings } from './features/organizer/settings/settings';
 
 import { CreateVenue } from './features/organizer/create-venue/create-venue';
 import { CreateEvent } from './features/organizer/create-event/create-event';
+import { VenueSections } from './features/organizer/venue-sections/venue-sections';
+import { EventSections } from './features/organizer/event-sections/event-sections';
 import { Home } from './features/attendee/home/home';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -33,8 +35,11 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardHome },
       { path: 'venues', component: Venues },
       { path: 'venues/create', component: CreateVenue },
+      // :id = hash'li mekân id'si, sayfa içinde ActivatedRoute ile okunuyor
+      { path: 'venues/:id/sections', component: VenueSections },
       { path: 'events', component: Events },
       { path: 'events/create', component: CreateEvent },
+      { path: 'events/:id/sections', component: EventSections },
       { path: 'settings', component: Settings },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

@@ -1,0 +1,94 @@
+<div class="page-header">
+  <div>
+    <h2 class="page-title">{{ event()?.title ?? 'Etkinlik' }}: Satış Bölümleri</h2>
+    @if (event(); as ev) {
+      <p class="page-subtitle">
+        {{ ev.eventDate | date }}
+        <!-- Durum rozeti: rengi events sayfasıyla aynı (badge-Draft / badge-Published / badge-Cancelled) -->
+        <span class="badge" [class]="'badge-' + ev.status">{{ statusLabel() }}</span>
+      </p>
+    }
+  </div>
+  <div class="card-actions">
+    @if (isEditable()) {
+      <app-ui-button variant="primary" (btnClick)="publish()" [class.disabled]="isPublishing()">
+        {{ isPublishing() ? 'Yayınlanıyor...' : 'Yayınla' }}
+      </app-ui-button>
+    }
+    <app-ui-button variant="default" [routerLink]="['/admin/events']">Etkinliklere dön</app-ui-button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger list-alert">{{ errorMessage() }}</div>
+}
+
+@if (isLoading()) {
+  <div class="state-message">Bölümler yükleniyor...</div>
+} @else if (event(); as ev) {
+  @if (!isEditable()) {
+    <!-- Yayındaki/iptal edilmiş etkinlikte fiyat değişirse önceden bilet alanlara haksızlık olur; bu yüzden kilitli -->
+    <div class="alert alert-info list-alert">
+      Bu etkinlik artık taslak değil ({{ statusLabel() }}). Satış bölümleri değiştirilemez.
+    </div>
+  } @else if (venueSections().length === 0) {
+    <div class="alert alert-info list-alert">
+      Bu etkinliğin mekanında henüz bölüm yok.
+      <a [routerLink]="['/admin/venues', ev.venueId, 'sections']">Önce mekana bölüm ekleyin.</a>
+    </div>
+  } @else if (availableOptions().length === 0) {
+    <div class="alert alert-info list-alert">Mekanın tüm bölümleri bu etkinliğe eklendi.</div>
+  } @else {
+    <!-- Yeni satış bölümü: mekanın bölümlerinden birini seç, bu etkinlik için fiyat ve kontenjan ver -->
+    <form class="inline-form" [formGroup]="addForm" (ngSubmit)="addEventSection()" novalidate>
+      <app-ui-select label="Bölüm" formControlName="sectionId" [options]="availableOptions()"
+        placeholder="Bölüm seçin" [error]="fieldError('add', 'sectionId')"></app-ui-select>
+      <app-ui-input label="Fiyat (TL)" type="number" formControlName="basePrice" [error]="fieldError('add', 'basePrice')"></app-ui-input>
+      <app-ui-input label="Kontenjan" type="number" formControlName="capacity" [error]="fieldError('add', 'capacity')"></app-ui-input>
+      <app-ui-button variant="primary" type="submit" [class.disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Ekleniyor...' : 'Ekle' }}
+      </app-ui-button>
+    </form>
+  }
+
+  @if (eventSections().length === 0) {
+    <div class="state-message">Bu etkinlikte henüz satışa açılmış bölüm yok. Yayınlamak için en az bir bölüm gerekli.</div>
+  } @else {
+    <div class="card-list">
+      @for (es of eventSections(); track es.id) {
+        <article class="list-card">
+          <h3 class="list-card-title">{{ sectionName(es.sectionId) }}</h3>
+
+          @if (editingId() === es.id) {
+            <!-- Düzenleme modu: sadece fiyat ve kontenjan değişebilir -->
+            <form class="edit-form" [formGroup]="editForm" (ngSubmit)="saveEdit(es)" novalidate>
+              <app-ui-input label="Fiyat (TL)" type="number" formControlName="basePrice" [error]="fieldError('edit', 'basePrice')"></app-ui-input>
+              <app-ui-input label="Kontenjan" type="number" formControlName="capacity" [error]="fieldError('edit', 'capacity')"></app-ui-input>
+              <div class="card-actions">
+                <button type="submit" class="link-primary" [disabled]="busyId() === es.id">
+                  {{ busyId() === es.id ? 'Kaydediliyor...' : 'Kaydet' }}
+                </button>
+                <button type="button" class="link-danger" (click)="cancelEdit()">Vazgeç</button>
+              </div>
+            </form>
+          } @else {
+            <!-- currency pipe: 500 -> "₺500,00" (LOCALE_ID 'tr' olduğu için Türkçe biçim) -->
+            <p class="list-card-meta">Fiyat: {{ es.basePrice | currency: 'TRY' }}</p>
+            <p class="list-card-meta">Kontenjan: {{ es.capacity }} (kalan {{ es.remainingCapacity }})</p>
+            <div class="list-card-footer">
+              <span class="badge">ID: {{ es.id }}</span>
+              @if (isEditable()) {
+                <div class="card-actions">
+                  <button class="link-primary" (click)="startEdit(es)" [disabled]="busyId() === es.id">Düzenle</button>
+                  <button class="link-danger" (click)="removeEventSection(es)" [disabled]="busyId() === es.id">
+                    {{ busyId() === es.id ? 'Kaldırılıyor...' : 'Kaldır' }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+}

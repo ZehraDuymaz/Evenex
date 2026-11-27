@@ -54,3 +54,41 @@ export interface CreateEventRequest {
 }
 
 export type UpdateEventRequest = Omit<CreateEventRequest, 'venueId'>;
+
+// ---------- Section (Mekânın bölümü: "Tribün A", "Sahne Önü") ----------
+// Bölüm mekâna aittir ve kalıcıdır; fiyat/kontenjan burada YOK, onlar etkinliğe göre değişir (EventSection).
+export type SectionType = 'Seated' | 'Standing';
+
+export interface SectionResponse {
+  id: string;
+  venueId: string;
+  name: string;
+  type: SectionType;
+}
+
+export interface CreateSectionRequest {
+  venueId: string;
+  name: string;
+  type: SectionType;
+}
+
+// ---------- EventSection (Bir etkinlikte satışa açılan bölüm) ----------
+// "Bu konserde Tribün A: 500 TL, 200 kişi" gibi. Aynı bölüm başka bir etkinlikte başka fiyatla satılabilir.
+export interface EventSectionResponse {
+  id: string;
+  eventId: string;
+  sectionId: string;
+  basePrice: number;
+  capacity: number;
+  remainingCapacity: number; // satıldıkça azalır (bilet satışı gelince)
+}
+
+export interface CreateEventSectionRequest {
+  eventId: string;
+  sectionId: string;
+  basePrice: number;
+  capacity: number;
+}
+
+// Etkinlik ve bölüm sonradan değiştirilemez; sadece fiyat ve kontenjan güncellenir
+export type UpdateEventSectionRequest = Pick<CreateEventSectionRequest, 'basePrice' | 'capacity'>;
